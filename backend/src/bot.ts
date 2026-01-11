@@ -7,6 +7,7 @@ import {
   getRoomsForPlayer,
   leaveRoom,
   getPlayers,
+  getPlayer,
 } from "./rooms";
 import "dotenv/config";
 
@@ -85,7 +86,10 @@ bot.command("lvl", async (ctx) => {
     return ctx.reply(
       "Ты не в комнате. Используй /join ID_КОМНАТЫ для входа в комнату."
     );
-
+  const player = await getPlayer(roomKeys[0], ctx.from.id.toString());
+  if (player?.nickname.length! < 1) {
+    return ctx.reply("Сначала установи ник командой: /nick ВАШ_НИК.");
+  }
   await updatePlayer(roomKeys[0], ctx.from.id.toString(), { level: lvl });
   ctx.reply(`Твой уровень изменен. Теперь твой уровень ${lvl}.`);
 });
@@ -100,7 +104,10 @@ bot.command("dmg", async (ctx) => {
     return ctx.reply(
       "Ты не в комнате. Используй /join ID_КОМНАТЫ для входа в комнату."
     );
-
+  const player = await getPlayer(roomKeys[0], ctx.from.id.toString());
+  if (player?.nickname.length! < 1) {
+    return ctx.reply("Сначала установи ник командой: /nick ВАШ_НИК.");
+  }
   await updatePlayer(roomKeys[0], ctx.from.id.toString(), { damage: dmg });
   ctx.reply(`Твой урон изменен. Теперь твой урон ${dmg}.`);
 });

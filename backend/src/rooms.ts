@@ -62,6 +62,13 @@ export async function getPlayers(
   return players;
 }
 
+export async function getPlayer(roomCode: string, playerId: string) {
+  const key = `room:${roomCode}:players`;
+  const p = await redis.hget(key, playerId);
+  if (!p) return null;
+  return JSON.parse(p) as Player;
+}
+
 export async function updatePlayer(
   roomCode: string,
   playerId: string,
