@@ -1,11 +1,5 @@
 import { WebSocket, WebSocketServer } from "ws";
-import {
-  createRoom,
-  addPlayer,
-  getPlayers,
-  updatePlayer,
-  Player,
-} from "./rooms";
+import { createRoom, getPlayers, updatePlayer } from "./rooms";
 
 interface WSMessage {
   type: string;
@@ -28,7 +22,7 @@ wss.on("connection", (ws) => {
         case "JOIN_ROOM":
           currentRoom = data.roomCode;
           currentPlayerId = data.playerId;
-
+          console.log(currentRoom);
           if (!currentRoom || !currentPlayerId) return;
 
           if (!rooms[currentRoom]) rooms[currentRoom] = new Set();
