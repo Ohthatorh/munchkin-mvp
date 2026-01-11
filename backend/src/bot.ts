@@ -10,25 +10,27 @@ const bot = new Telegraf(BOT_TOKEN);
 bot.command("join", async (ctx) => {
   const args = ctx.message.text.split(" ");
   const roomCode = args[1]?.toUpperCase();
-  console.log(roomCode);
+
   if (!roomCode)
     return ctx.reply("Используй: /join ID_КОМНАТЫ чтобы войти в комнату.");
   if ((await roomExists(roomCode)) === false)
     return ctx.reply(`Комнаты ${roomCode} не существует.`);
 
-  // const player: Player = {
-  //   id: ctx.from.id.toString(),
-  //   nickname: "",
-  //   level: 1,
-  //   damage: 0,
-  // };
+  const player: Player = {
+    id: ctx.from.id.toString(),
+    nickname: "",
+    level: 1,
+    damage: 0,
+  };
 
-  // try {
-  //   await addPlayer(roomCode, player);
-  //   ctx.reply(`Joined room ${roomCode}. Send your nickname with /nick <name>`);
-  // } catch (err: any) {
-  //   ctx.reply(`Error: ${err.message}`);
-  // }
+  try {
+    await addPlayer(roomCode, player);
+    ctx.reply(
+      `Вы вошли в комнату ${roomCode}. Пожалуйста, напишите свой никнейм командой /nick ВАШ_НИК`
+    );
+  } catch (err: any) {
+    ctx.reply(`Error: ${err.message}`);
+  }
 });
 
 // игрок ставит ник

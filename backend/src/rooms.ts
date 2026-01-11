@@ -41,7 +41,7 @@ export async function addPlayer(roomCode: string, player: Player) {
   for (const p of Object.values(players)) {
     const existing = JSON.parse(p) as Player;
     if (existing.nickname.toLowerCase() === player.nickname.toLowerCase()) {
-      throw new Error("Nickname already taken");
+      throw new Error("Ник уже занят. Пожалуйста, используй другой ник.");
     }
   }
 
