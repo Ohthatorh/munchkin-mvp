@@ -21,7 +21,7 @@ export default function Room() {
   useEffect(() => {
     if (!roomId) return;
 
-    const socket = new WebSocket("ws://localhost:3001");
+    const socket = new WebSocket("ws://127.0.0.1:3001");
     wsRef.current = socket; // сохраняем в ref, не в state
 
     socket.onopen = () => {
