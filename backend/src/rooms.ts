@@ -49,10 +49,17 @@ export async function addPlayer(roomCode: string, player: Player) {
   await redis.expire(key, ROOM_TTL);
 }
 
-export async function getPlayers(roomCode: string): Promise<Player[]> {
+export async function getPlayers(
+  roomCode: string
+): Promise<Record<string, Player>> {
   const key = `room:${roomCode}:players`;
-  const players = await redis.hgetall(key);
-  return Object.values(players).map((p) => JSON.parse(p) as Player);
+  const raw = await redis.hgetall(key);
+
+  const players: Record<string, Player> = {};
+  for (const id in raw) {
+    players[id] = JSON.parse(raw[id]);
+  }
+  return players;
 }
 
 export async function updatePlayer(
