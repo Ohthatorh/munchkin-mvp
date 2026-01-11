@@ -34,26 +34,31 @@ bot.command("join", async (ctx) => {
 });
 
 // игрок ставит ник
-// bot.command("nick", async (ctx) => {
-//   const args = ctx.message.text.split(" ");
-//   const nick = args[1];
-//   if (!nick) return ctx.reply("Usage: /nick <name>");
+bot.command("nick", async (ctx) => {
+  const args = ctx.message.text.split(" ");
+  const nick = args[1];
+  if (!nick) return ctx.reply("Используй: /nick ВАШ_НИК чтобы установить ник.");
 
-//   // находим комнату игрока
-//   const roomKeys = await getRoomsForPlayer(ctx.from.id.toString());
-//   if (!roomKeys.length) return ctx.reply("You are not in any room");
+  // находим комнату игрока
+  const roomKeys = await getRoomsForPlayer(ctx.from.id.toString());
+  if (!roomKeys.length)
+    return ctx.reply(
+      "Ты не в комнате. Используй /join ID_КОМНАТЫ для входа в комнату."
+    );
 
-//   const roomCode = roomKeys[0];
+  const roomCode = roomKeys[0];
 
-//   try {
-//     const updated = await updatePlayer(roomCode, ctx.from.id.toString(), {
-//       nickname: nick,
-//     });
-//     ctx.reply(`Nickname set to ${nick}`);
-//   } catch (err: any) {
-//     ctx.reply(`Error: ${err.message}`);
-//   }
-// });
+  try {
+    const updated = await updatePlayer(roomCode, ctx.from.id.toString(), {
+      nickname: nick,
+    });
+    ctx.reply(
+      `Твой ник - ${nick}. Ты манчкин ${updated.level} уровня с ${updated.damage} уроном.`
+    );
+  } catch (err: any) {
+    ctx.reply(`Error: ${err.message}`);
+  }
+});
 
 // // команды lvl/dmg
 // bot.command("lvl", async (ctx) => {
@@ -84,7 +89,6 @@ bot.launch();
 console.log("Telegram bot started");
 
 async function getRoomsForPlayer(playerId: string): Promise<string[]> {
-  // ищем комнаты, где есть игрок
   const keys = await redis.keys("room:*:players");
   const result: string[] = [];
   for (const key of keys) {
