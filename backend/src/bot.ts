@@ -2,8 +2,7 @@ import { Telegraf } from "telegraf";
 import { addPlayer, updatePlayer, Player } from "./rooms";
 import { redis } from "./redisClient";
 
-const BOT_TOKEN =
-  process.env.BOT_TOKEN || "8584564268:AAHVy_qrtYx5mdizX-6WzodNwFC9TguiHlY";
+const BOT_TOKEN = process.env.BOT_TOKEN || "<YOUR_BOT_TOKEN>";
 const bot = new Telegraf(BOT_TOKEN);
 
 // командой /join ABC123 игрок заходит
