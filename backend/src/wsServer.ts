@@ -1,4 +1,4 @@
-import { WebSocketServer } from "ws";
+import { WebSocket, WebSocketServer } from "ws";
 import {
   createRoom,
   addPlayer,
@@ -13,8 +13,7 @@ interface WSMessage {
 }
 
 const wss = new WebSocketServer({ port: 3001 });
-
-const rooms: Record<string, Set<any>> = {}; // code -> set of ws connections
+const rooms: Record<string, Set<WebSocket>> = {};
 
 wss.on("connection", (ws) => {
   let currentRoom: string | null = null;
@@ -28,29 +27,23 @@ wss.on("connection", (ws) => {
       switch (type) {
         case "JOIN_ROOM":
           currentRoom = data.roomCode;
-          if (!currentRoom) return;
+          currentPlayerId = data.playerId;
+
+          if (!currentRoom || !currentPlayerId) return;
+
           if (!rooms[currentRoom]) rooms[currentRoom] = new Set();
           rooms[currentRoom].add(ws);
 
-          // создаем комнату в Redis, если нет
           await createRoom(currentRoom);
 
-          // возвращаем текущее состояние
-          const players = await getPlayers(currentRoom);
-          broadcastRoomState(currentRoom, players);
+          await broadcastRoomState(currentRoom);
           break;
 
         case "PLAYER_UPDATE":
-          if (!currentRoom) return;
-          if (!currentPlayerId) return;
-          currentPlayerId = data.playerId;
+          if (!currentRoom || !currentPlayerId) return;
 
-          const updated = await updatePlayer(
-            currentRoom,
-            currentPlayerId!,
-            data.updates
-          );
-          broadcastRoomState(currentRoom, await getPlayers(currentRoom));
+          await updatePlayer(currentRoom, currentPlayerId, data.updates);
+          await broadcastRoomState(currentRoom);
           break;
 
         default:
@@ -68,12 +61,14 @@ wss.on("connection", (ws) => {
   });
 });
 
-function broadcastRoomState(roomCode: string, players: Player[]) {
+async function broadcastRoomState(roomCode: string) {
   if (!rooms[roomCode]) return;
+
+  const playersObj = await getPlayers(roomCode); // Record<string, Player>
+  const players = Object.values(playersObj); // Player[]
+
   const msg = JSON.stringify({ type: "ROOM_STATE", data: players });
-  rooms[roomCode].forEach((client) => {
-    client.send(msg);
-  });
+  rooms[roomCode].forEach((client) => client.send(msg));
 }
 
 console.log("WebSocket server running on ws://localhost:3001");
