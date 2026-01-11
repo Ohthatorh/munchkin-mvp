@@ -23,7 +23,7 @@ wss.on("connection", (ws) => {
           currentRoom = data.roomCode;
           currentPlayerId = data.playerId;
 
-          if (!currentRoom || !currentPlayerId) return;
+          if (!currentRoom) return;
 
           if (!rooms[currentRoom]) rooms[currentRoom] = new Set();
           rooms[currentRoom].add(ws);
