@@ -34,6 +34,7 @@ wss.on("connection", (ws) => {
           break;
 
         case "PLAYER_UPDATE":
+          console.log("tut");
           if (!currentRoom || !currentPlayerId) return;
 
           await updatePlayer(currentRoom, currentPlayerId, data.updates);

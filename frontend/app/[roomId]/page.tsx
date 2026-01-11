@@ -32,6 +32,7 @@ export default function Room() {
 
     socket.onmessage = (event: MessageEvent) => {
       const msg = JSON.parse(event.data.toString());
+      console.log(msg);
       if (msg.type === "ROOM_STATE") setPlayers(msg.data);
     };
 
