@@ -126,7 +126,7 @@ bot.command("leave", async (ctx) => {
   ctx.reply(`Вы вышли из комнаты ${roomCode}.`);
 });
 
-bot.command("mystat", async (ctx) => {
+bot.command("mystats", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
   if (!rooms.length) return ctx.reply("Ты не состоишь ни в одной комнате.");
   const room = rooms[0];

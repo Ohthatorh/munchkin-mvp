@@ -106,7 +106,10 @@ export async function leaveRoom(roomCode: string, playerId: string) {
 export function formatRoomStats(players: Record<string, Player>): string {
   const arr = Object.values(players)
     .map(
-      (p) => `${p.nickname} — ${p.level} — ${p.damage} — ${p.level + p.damage}`
+      (p) =>
+        `Манчкин: ${p.nickname}. Уровень: ${p.level}. Урон от шмоток: ${
+          p.damage
+        }. Общий урон: ${p.level + p.damage}`
     )
     .join("\n");
   return arr || "Комната пуста";
