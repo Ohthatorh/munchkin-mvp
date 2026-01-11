@@ -127,7 +127,7 @@ bot.command("stat", async (ctx) => {
 
   const room = rooms[0];
   const players = await getPlayers(room);
-  const player = players[ctx.from.id];
+  const player = players[ctx.from.id.toString()];
   if (!player) return ctx.reply("Вы не найдены в комнате");
 
   ctx.reply(
