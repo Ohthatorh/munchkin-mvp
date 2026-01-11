@@ -15,13 +15,13 @@ export default function Room() {
   const params = useParams();
   const roomId = params.roomId;
   const [players, setPlayers] = useState<Player[]>([]);
-  console.log(players);
+
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     if (!roomId) return;
 
-    const socket = new WebSocket("ws://195.161.114.116:3001");
+    const socket = new WebSocket("ws://localhost:3001");
     wsRef.current = socket; // сохраняем в ref, не в state
 
     socket.onopen = () => {
@@ -32,7 +32,6 @@ export default function Room() {
 
     socket.onmessage = (event: MessageEvent) => {
       const msg = JSON.parse(event.data.toString());
-      console.log(msg);
       if (msg.type === "ROOM_STATE") setPlayers(msg.data);
     };
 
