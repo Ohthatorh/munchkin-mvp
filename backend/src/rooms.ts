@@ -23,10 +23,13 @@ export async function createRoom(code: string) {
 }
 
 export async function roomExists(roomCode: string): Promise<boolean> {
-  const key = `room:${roomCode}:players`;
-  console.log(key);
+  const key = `room:${roomCode}`;
   const exists = await redis.exists(key);
-  console.log(exists);
+  console.log(
+    exists === 1
+      ? `Комната ${roomCode} существует. Подключаемся...`
+      : `Комнаты ${roomCode} не существует.`
+  );
   return exists === 1;
 }
 
