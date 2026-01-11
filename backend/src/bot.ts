@@ -1,5 +1,6 @@
 import { Telegraf } from "telegraf";
-import { addPlayer, updatePlayer, getPlayers, Player } from "./rooms";
+import { addPlayer, updatePlayer, Player } from "./rooms";
+import { redis } from "./redisClient";
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "<YOUR_BOT_TOKEN>";
 const bot = new Telegraf(BOT_TOKEN);

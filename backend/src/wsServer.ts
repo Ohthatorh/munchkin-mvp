@@ -28,6 +28,7 @@ wss.on("connection", (ws) => {
       switch (type) {
         case "JOIN_ROOM":
           currentRoom = data.roomCode;
+          if (!currentRoom) return;
           if (!rooms[currentRoom]) rooms[currentRoom] = new Set();
           rooms[currentRoom].add(ws);
 
@@ -41,11 +42,12 @@ wss.on("connection", (ws) => {
 
         case "PLAYER_UPDATE":
           if (!currentRoom) return;
+          if (!currentPlayerId) return;
           currentPlayerId = data.playerId;
 
           const updated = await updatePlayer(
             currentRoom,
-            currentPlayerId,
+            currentPlayerId!,
             data.updates
           );
           broadcastRoomState(currentRoom, await getPlayers(currentRoom));
