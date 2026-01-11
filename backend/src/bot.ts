@@ -8,7 +8,6 @@ import {
   leaveRoom,
   getPlayers,
 } from "./rooms";
-import { redis } from "./redisClient";
 import "dotenv/config";
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "<YOUR_BOT_TOKEN>";
@@ -23,7 +22,14 @@ bot.command("join", async (ctx) => {
     return ctx.reply("Используй: /join ID_КОМНАТЫ чтобы войти в комнату.");
   if ((await roomExists(roomCode)) === false)
     return ctx.reply(`Комнаты ${roomCode} не существует.`);
-
+  const roomKeys = await getRoomsForPlayer(ctx.from.id.toString());
+  if (roomKeys.includes(roomCode))
+    return ctx.reply(`Ты уже в комнате ${roomCode}.`);
+  if (roomKeys.length > 0 && roomKeys[0] !== roomCode) {
+    return ctx.reply(
+      `Ты уже комнате ${roomKeys[0]}. Пожалуйста, выйди из нее командой: /leave ${roomKeys[0]}.`
+    );
+  }
   const player: Player = {
     id: ctx.from.id.toString(),
     nickname: "",
@@ -34,7 +40,7 @@ bot.command("join", async (ctx) => {
   try {
     await addPlayer(roomCode, player);
     ctx.reply(
-      `Вы вошли в комнату ${roomCode}. Пожалуйста, напишите свой никнейм командой /nick ВАШ_НИК`
+      `Ты в комнате ${roomCode}. Пожалуйста, напиши свой никнейм командой: /nick ВАШ_НИК.`
     );
   } catch (err: any) {
     ctx.reply(`Ошибка: ${err.message}`);
@@ -106,34 +112,24 @@ bot.command("leave", async (ctx) => {
     return ctx.reply("Используй: /leave ID_КОМНАТЫ для выхода из комнаты.");
 
   if (!(await roomExists(roomCode)))
-    return ctx.reply(`Комната ${roomCode} не существует!`);
+    return ctx.reply(`Комнаты ${roomCode} не существует!`);
 
   await leaveRoom(roomCode, ctx.from.id.toString());
-  ctx.reply(`Вы вышли из комнаты ${roomCode}`);
+  ctx.reply(`Вы вышли из комнаты ${roomCode}.`);
 });
 
 bot.command("stat", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!rooms.length) return ctx.reply("Вы не состоите ни в одной комнате");
-
-  if (rooms.length > 1) {
-    return ctx.reply(
-      "Вы состоите в нескольких комнатах, выберите комнату:",
-      Markup.inlineKeyboard(
-        rooms.map((r) => Markup.button.callback(r, `selectRoom:${r}`))
-      )
-    );
-  }
-
+  if (!rooms.length) return ctx.reply("Ты не состоишь ни в одной комнате.");
   const room = rooms[0];
   const players = await getPlayers(room);
   const player = players[ctx.from.id.toString()];
-  if (!player) return ctx.reply("Вы не найдены в комнате");
+  if (!player) return ctx.reply(`Ты не состоишь в комнате ${room}.`);
 
   ctx.reply(
-    `Ник: ${player.nickname || "не установлен"}\nLVL: ${player.level}\nDMG: ${
-      player.damage
-    }`
+    `Комната: ${room}\nНик: ${player.nickname || "не установлен"}\nLVL: ${
+      player.level
+    }\nDMG: ${player.damage}`
   );
 });
 
