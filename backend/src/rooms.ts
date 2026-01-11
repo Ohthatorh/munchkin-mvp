@@ -22,6 +22,12 @@ export async function createRoom(code: string) {
   return true;
 }
 
+export async function roomExists(roomCode: string): Promise<boolean> {
+  const key = `room:${roomCode}:players`;
+  const exists = await redis.exists(key);
+  return exists === 1;
+}
+
 export async function addPlayer(roomCode: string, player: Player) {
   const key = `room:${roomCode}:players`;
   const players = await redis.hgetall(key);

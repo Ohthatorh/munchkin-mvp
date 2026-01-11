@@ -1,16 +1,28 @@
 import { Telegraf } from "telegraf";
-import { addPlayer, updatePlayer, Player } from "./rooms";
+import {
+  addPlayer,
+  updatePlayer,
+  getPlayers,
+  Player,
+  roomExists,
+} from "./rooms";
 import { redis } from "./redisClient";
-import "dotenv/config";
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "<YOUR_BOT_TOKEN>";
 const bot = new Telegraf(BOT_TOKEN);
 
-// командой /join ABC123 игрок заходит
+bot.start((ctx) =>
+  ctx.reply("Привет! Используй /join <ROOMCODE> чтобы присоединиться")
+);
+
+// /join <ROOMCODE>
 bot.command("join", async (ctx) => {
   const args = ctx.message.text.split(" ");
   const roomCode = args[1]?.toUpperCase();
-  if (!roomCode) return ctx.reply("Usage: /join <ROOMCODE>");
+  if (!roomCode) return ctx.reply("Используй: /join <ROOMCODE>");
+
+  if (!(await roomExists(roomCode)))
+    return ctx.reply(`Комната ${roomCode} не существует!`);
 
   const player: Player = {
     id: ctx.from.id.toString(),
@@ -21,64 +33,69 @@ bot.command("join", async (ctx) => {
 
   try {
     await addPlayer(roomCode, player);
-    ctx.reply(`Joined room ${roomCode}. Send your nickname with /nick <name>`);
+    ctx.reply(
+      `Ты присоединился к комнате ${roomCode}. Установи ник /nick <имя>`
+    );
   } catch (err: any) {
-    ctx.reply(`Error: ${err.message}`);
+    ctx.reply(`Ошибка: ${err.message}`);
   }
 });
 
-// игрок ставит ник
+// /nick <NAME>
 bot.command("nick", async (ctx) => {
   const args = ctx.message.text.split(" ");
   const nick = args[1];
-  if (!nick) return ctx.reply("Usage: /nick <name>");
+  if (!nick) return ctx.reply("Используй: /nick <имя>");
 
-  // находим комнату игрока
-  const roomKeys = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!roomKeys.length) return ctx.reply("You are not in any room");
+  const rooms = await getRoomsForPlayer(ctx.from.id.toString());
+  if (!rooms.length) return ctx.reply("Ты не в комнате");
 
-  const roomCode = roomKeys[0];
+  if (!(await roomExists(rooms[0])))
+    return ctx.reply("Комнаты больше не существует!");
 
   try {
-    const updated = await updatePlayer(roomCode, ctx.from.id.toString(), {
-      nickname: nick,
-    });
-    ctx.reply(`Nickname set to ${nick}`);
+    await updatePlayer(rooms[0], ctx.from.id.toString(), { nickname: nick });
+    ctx.reply(`Твой ник установлен: ${nick}`);
   } catch (err: any) {
-    ctx.reply(`Error: ${err.message}`);
+    ctx.reply(`Ошибка: ${err.message}`);
   }
 });
 
-// команды lvl/dmg
+// /lvl <N>
 bot.command("lvl", async (ctx) => {
   const args = ctx.message.text.split(" ");
   const lvl = parseInt(args[1]);
-  if (isNaN(lvl) || lvl < 1 || lvl > 10) return ctx.reply("Level must be 1-10");
+  if (isNaN(lvl) || lvl < 1 || lvl > 10)
+    return ctx.reply("LVL должен быть 1-10");
 
-  const roomKeys = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!roomKeys.length) return ctx.reply("You are not in any room");
+  const rooms = await getRoomsForPlayer(ctx.from.id.toString());
+  if (!rooms.length) return ctx.reply("Ты не в комнате");
 
-  await updatePlayer(roomKeys[0], ctx.from.id.toString(), { level: lvl });
-  ctx.reply(`Level set to ${lvl}`);
+  if (!(await roomExists(rooms[0])))
+    return ctx.reply("Комнаты больше не существует!");
+
+  await updatePlayer(rooms[0], ctx.from.id.toString(), { level: lvl });
+  ctx.reply(`LVL установлен: ${lvl}`);
 });
 
+// /dmg <N>
 bot.command("dmg", async (ctx) => {
   const args = ctx.message.text.split(" ");
   const dmg = parseInt(args[1]);
-  if (isNaN(dmg) || dmg < 0) return ctx.reply("Damage must be >= 0");
+  if (isNaN(dmg) || dmg < 0) return ctx.reply("DMG должен быть >= 0");
 
-  const roomKeys = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!roomKeys.length) return ctx.reply("You are not in any room");
+  const rooms = await getRoomsForPlayer(ctx.from.id.toString());
+  if (!rooms.length) return ctx.reply("Ты не в комнате");
 
-  await updatePlayer(roomKeys[0], ctx.from.id.toString(), { damage: dmg });
-  ctx.reply(`Damage set to ${dmg}`);
+  if (!(await roomExists(rooms[0])))
+    return ctx.reply("Комнаты больше не существует!");
+
+  await updatePlayer(rooms[0], ctx.from.id.toString(), { damage: dmg });
+  ctx.reply(`DMG установлен: ${dmg}`);
 });
 
-bot.launch();
-console.log("Telegram bot started");
-
+// функция поиска комнаты игрока
 async function getRoomsForPlayer(playerId: string): Promise<string[]> {
-  // ищем комнаты, где есть игрок
   const keys = await redis.keys("room:*:players");
   const result: string[] = [];
   for (const key of keys) {
