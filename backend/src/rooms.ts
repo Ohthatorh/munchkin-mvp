@@ -1,4 +1,5 @@
 import { redis } from "./redisClient";
+import { broadcastRoomState } from "./wsServer";
 
 export interface Player {
   id: string;
@@ -82,6 +83,7 @@ export async function updatePlayer(
   const newPlayer = { ...player, ...updates };
   await redis.hset(key, playerId, JSON.stringify(newPlayer));
   await redis.expire(key, ROOM_TTL);
+  await broadcastRoomState(roomCode);
   return newPlayer;
 }
 

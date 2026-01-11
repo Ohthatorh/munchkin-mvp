@@ -11,8 +11,6 @@ const rooms: Record<string, Set<WebSocket>> = {};
 
 wss.on("connection", (ws) => {
   let currentRoom: string | null = null;
-  let currentPlayerId: string | null = null;
-
   ws.on("message", async (message) => {
     try {
       const msg: WSMessage = JSON.parse(message.toString());
@@ -21,23 +19,12 @@ wss.on("connection", (ws) => {
       switch (type) {
         case "JOIN_ROOM":
           currentRoom = data.roomCode;
-          currentPlayerId = data.playerId;
-
           if (!currentRoom) return;
-
           if (!rooms[currentRoom]) rooms[currentRoom] = new Set();
           rooms[currentRoom].add(ws);
 
           await createRoom(currentRoom);
 
-          await broadcastRoomState(currentRoom);
-          break;
-
-        case "PLAYER_UPDATE":
-          console.log("tut");
-          if (!currentRoom || !currentPlayerId) return;
-
-          await updatePlayer(currentRoom, currentPlayerId, data.updates);
           await broadcastRoomState(currentRoom);
           break;
 
@@ -56,7 +43,7 @@ wss.on("connection", (ws) => {
   });
 });
 
-async function broadcastRoomState(roomCode: string) {
+export async function broadcastRoomState(roomCode: string) {
   if (!rooms[roomCode]) return;
 
   const playersObj = await getPlayers(roomCode); // Record<string, Player>
