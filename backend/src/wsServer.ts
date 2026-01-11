@@ -22,7 +22,7 @@ wss.on("connection", (ws) => {
         case "JOIN_ROOM":
           currentRoom = data.roomCode;
           currentPlayerId = data.playerId;
-          console.log(currentRoom);
+
           if (!currentRoom || !currentPlayerId) return;
 
           if (!rooms[currentRoom]) rooms[currentRoom] = new Set();
