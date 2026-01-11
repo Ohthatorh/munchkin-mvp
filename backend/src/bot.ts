@@ -129,9 +129,11 @@ bot.command("stat", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
   if (!rooms.length) return ctx.reply("Ты не состоишь ни в одной комнате.");
   const room = rooms[0];
-  const players = await getPlayers(room);
-  const player = players[ctx.from.id.toString()];
+  const player = await getPlayer(room, ctx.from.id.toString());
   if (!player) return ctx.reply(`Ты не состоишь в комнате ${room}.`);
+  if (player?.nickname.length! < 1) {
+    return ctx.reply("Сначала установи ник командой: /nick ВАШ_НИК.");
+  }
 
   ctx.reply(
     `Комната: ${room}\nНик: ${player.nickname || "не установлен"}\nLVL: ${
