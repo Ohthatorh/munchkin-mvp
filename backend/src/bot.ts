@@ -29,7 +29,7 @@ bot.command("join", async (ctx) => {
       `Вы вошли в комнату ${roomCode}. Пожалуйста, напишите свой никнейм командой /nick ВАШ_НИК`
     );
   } catch (err: any) {
-    ctx.reply(`Error: ${err.message}`);
+    ctx.reply(`Ошибка: ${err.message}`);
   }
 });
 
@@ -53,25 +53,28 @@ bot.command("nick", async (ctx) => {
       nickname: nick,
     });
     ctx.reply(
-      `Твой ник - ${nick}. Ты манчкин ${updated.level} уровня с ${updated.damage} уроном.`
+      `Твой ник - ${nick}. Ты - манчкин ${updated.level} уровня с ${updated.damage} уроном.`
     );
   } catch (err: any) {
-    ctx.reply(`Error: ${err.message}`);
+    ctx.reply(`Ошибка: ${err.message}`);
   }
 });
 
-// // команды lvl/dmg
-// bot.command("lvl", async (ctx) => {
-//   const args = ctx.message.text.split(" ");
-//   const lvl = parseInt(args[1]);
-//   if (isNaN(lvl) || lvl < 1 || lvl > 10) return ctx.reply("Level must be 1-10");
+bot.command("lvl", async (ctx) => {
+  const args = ctx.message.text.split(" ");
+  const lvl = parseInt(args[1]);
+  if (isNaN(lvl) || lvl < 1 || lvl > 10)
+    return ctx.reply("Уровень должен быть от 1 до 10");
 
-//   const roomKeys = await getRoomsForPlayer(ctx.from.id.toString());
-//   if (!roomKeys.length) return ctx.reply("You are not in any room");
+  const roomKeys = await getRoomsForPlayer(ctx.from.id.toString());
+  if (!roomKeys.length)
+    return ctx.reply(
+      "Ты не в комнате. Используй /join ID_КОМНАТЫ для входа в комнату."
+    );
 
-//   await updatePlayer(roomKeys[0], ctx.from.id.toString(), { level: lvl });
-//   ctx.reply(`Level set to ${lvl}`);
-// });
+  await updatePlayer(roomKeys[0], ctx.from.id.toString(), { level: lvl });
+  ctx.reply(`Твой уровень изменен. Теперь твой уровень ${lvl}.`);
+});
 
 // bot.command("dmg", async (ctx) => {
 //   const args = ctx.message.text.split(" ");
