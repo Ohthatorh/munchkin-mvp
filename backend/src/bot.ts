@@ -13,7 +13,7 @@ bot.command("join", async (ctx) => {
   console.log(roomCode);
   if (!roomCode)
     return ctx.reply("Используй: /join ID_КОМНАТЫ чтобы войти в комнату.");
-  if (!roomExists(roomCode))
+  if ((await roomExists(roomCode)) === false)
     return ctx.reply(`Комнаты ${roomCode} не существует.`);
 
   // const player: Player = {
