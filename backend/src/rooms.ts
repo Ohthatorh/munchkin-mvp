@@ -27,7 +27,7 @@ export async function roomExists(roomCode: string): Promise<boolean> {
   const exists = await redis.exists(key);
   console.log(
     exists === 1
-      ? `Комната ${roomCode} существует. Подключаемся...`
+      ? `Комната ${roomCode} существует.`
       : `Комнаты ${roomCode} не существует.`
   );
   return exists === 1;
@@ -35,15 +35,15 @@ export async function roomExists(roomCode: string): Promise<boolean> {
 
 export async function addPlayer(roomCode: string, player: Player) {
   const key = `room:${roomCode}:players`;
-  const players = await redis.hgetall(key);
+  // const players = await redis.hgetall(key);
 
-  // проверка уникальности ника без регистра
-  for (const p of Object.values(players)) {
-    const existing = JSON.parse(p) as Player;
-    if (existing.nickname.toLowerCase() === player.nickname.toLowerCase()) {
-      throw new Error("Ник уже занят. Пожалуйста, используй другой ник.");
-    }
-  }
+  // // проверка уникальности ника без регистра
+  // for (const p of Object.values(players)) {
+  //   const existing = JSON.parse(p) as Player;
+  //   if (existing.nickname.toLowerCase() === player.nickname.toLowerCase()) {
+  //     throw new Error("Ник уже занят. Пожалуйста, используй другой ник.");
+  //   }
+  // }
 
   await redis.hset(key, player.id, JSON.stringify(player));
   await redis.expire(key, ROOM_TTL);
