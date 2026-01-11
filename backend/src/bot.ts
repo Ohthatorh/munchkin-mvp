@@ -1,10 +1,11 @@
 import { Telegraf } from "telegraf";
 import { addPlayer, updatePlayer, Player } from "./rooms";
 import { redis } from "./redisClient";
+import "dotenv/config";
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "<YOUR_BOT_TOKEN>";
 const bot = new Telegraf(BOT_TOKEN);
-console.log(bot);
+console.log(BOT_TOKEN);
 
 // // командой /join ABC123 игрок заходит
 // bot.command("join", async (ctx) => {
