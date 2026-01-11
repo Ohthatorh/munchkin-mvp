@@ -18,7 +18,7 @@ const ROOM_TTL = 12 * 60 * 60; // 12 часов в секундах
 export async function createRoom(code: string) {
   const exists = await redis.exists(`room:${code}`);
   if (exists) return false;
-  console.log('Комната "' + code + '" создана.');
+  console.log("Комната " + code + " создана.");
   await redis.hset(`room:${code}`, "createdAt", Date.now().toString());
   await redis.expire(`room:${code}`, ROOM_TTL);
   return true;
