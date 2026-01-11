@@ -49,8 +49,9 @@ export default function Room() {
         <thead>
           <tr>
             <th>Ник</th>
-            <th>LVL</th>
-            <th>DMG</th>
+            <th>Уровень</th>
+            <th>Шмотки</th>
+            <th>Общий урон</th>
           </tr>
         </thead>
         <tbody>
@@ -59,6 +60,7 @@ export default function Room() {
               <td>{p.nickname}</td>
               <td>{p.level}</td>
               <td>{p.damage}</td>
+              <td>{p.damage + p.level}</td>
             </tr>
           ))}
         </tbody>

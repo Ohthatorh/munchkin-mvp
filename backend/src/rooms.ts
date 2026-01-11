@@ -100,4 +100,14 @@ export async function getRoomsForPlayer(playerId: string): Promise<string[]> {
 export async function leaveRoom(roomCode: string, playerId: string) {
   const key = `room:${roomCode}:players`;
   await redis.hdel(key, playerId);
+  await broadcastRoomState(roomCode);
+}
+
+export function formatRoomStats(players: Record<string, Player>): string {
+  const arr = Object.values(players)
+    .map(
+      (p) => `${p.nickname} — ${p.level} — ${p.damage} — ${p.level + p.damage}`
+    )
+    .join("\n");
+  return arr || "Комната пуста";
 }

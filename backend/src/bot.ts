@@ -8,6 +8,7 @@ import {
   leaveRoom,
   getPlayers,
   getPlayer,
+  formatRoomStats,
 } from "./rooms";
 import "dotenv/config";
 
@@ -125,7 +126,7 @@ bot.command("leave", async (ctx) => {
   ctx.reply(`Вы вышли из комнаты ${roomCode}.`);
 });
 
-bot.command("stat", async (ctx) => {
+bot.command("mystat", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
   if (!rooms.length) return ctx.reply("Ты не состоишь ни в одной комнате.");
   const room = rooms[0];
@@ -140,6 +141,22 @@ bot.command("stat", async (ctx) => {
       player.level
     }\nDMG: ${player.damage}`
   );
+});
+
+bot.command("stats", async (ctx) => {
+  const playerId = ctx.from.id.toString();
+
+  // узнаем, в каких комнатах состоит игрок
+  const rooms = await getRoomsForPlayer(playerId);
+  if (rooms.length === 0) return ctx.reply("Вы не находитесь в комнате.");
+
+  // если больше одной комнаты — можно пока брать первую
+  const room = rooms[0];
+
+  const players = await getPlayers(room); // Record<string, Player>
+
+  const message = formatRoomStats(players);
+  ctx.reply(`Статистика комнаты ${room}:\n\n${message}`);
 });
 
 bot.launch();
