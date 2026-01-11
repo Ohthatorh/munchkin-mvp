@@ -69,3 +69,18 @@ export async function updatePlayer(
   await redis.expire(key, ROOM_TTL);
   return newPlayer;
 }
+
+export async function getRoomsForPlayer(playerId: string): Promise<string[]> {
+  const keys = await redis.keys("room:*:players");
+  const result: string[] = [];
+  for (const key of keys) {
+    const players = await redis.hgetall(key);
+    if (players[playerId]) result.push(key.split(":")[1]);
+  }
+  return result;
+}
+
+export async function leaveRoom(roomCode: string, playerId: string) {
+  const key = `room:${roomCode}:players`;
+  await redis.hdel(key, playerId);
+}

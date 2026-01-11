@@ -15,6 +15,7 @@ export default function Room() {
   const params = useParams();
   const roomId = params.roomId;
   const [players, setPlayers] = useState<Player[]>([]);
+  console.log(players);
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
