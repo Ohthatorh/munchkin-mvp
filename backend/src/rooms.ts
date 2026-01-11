@@ -1,0 +1,60 @@
+import { redis } from "./redisClient";
+
+export interface Player {
+  id: string;
+  nickname: string;
+  level: number;
+  damage: number;
+}
+
+export interface Room {
+  code: string;
+  players: Record<string, Player>;
+}
+
+const ROOM_TTL = 12 * 60 * 60; // 12 часов в секундах
+
+export async function createRoom(code: string) {
+  const exists = await redis.exists(`room:${code}`);
+  if (exists) return false;
+  await redis.hset(`room:${code}`, "createdAt", Date.now().toString());
+  await redis.expire(`room:${code}`, ROOM_TTL);
+  return true;
+}
+
+export async function addPlayer(roomCode: string, player: Player) {
+  const key = `room:${roomCode}:players`;
+  const players = await redis.hgetall(key);
+
+  // проверка уникальности ника без регистра
+  for (const p of Object.values(players)) {
+    const existing = JSON.parse(p) as Player;
+    if (existing.nickname.toLowerCase() === player.nickname.toLowerCase()) {
+      throw new Error("Nickname already taken");
+    }
+  }
+
+  await redis.hset(key, player.id, JSON.stringify(player));
+  await redis.expire(key, ROOM_TTL);
+}
+
+export async function getPlayers(roomCode: string): Promise<Player[]> {
+  const key = `room:${roomCode}:players`;
+  const players = await redis.hgetall(key);
+  return Object.values(players).map((p) => JSON.parse(p) as Player);
+}
+
+export async function updatePlayer(
+  roomCode: string,
+  playerId: string,
+  updates: Partial<Player>
+) {
+  const key = `room:${roomCode}:players`;
+  const p = await redis.hget(key, playerId);
+  if (!p) throw new Error("Player not found");
+  const player = JSON.parse(p) as Player;
+  const newPlayer = { ...player, ...updates };
+  await redis.hset(key, playerId, JSON.stringify(newPlayer));
+  await redis.expire(key, ROOM_TTL);
+  return newPlayer;
+}
