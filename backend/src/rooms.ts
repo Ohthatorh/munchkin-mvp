@@ -108,9 +108,9 @@ export function formatRoomStats(players: Record<string, Player>): string {
   const arr = Object.values(players)
     .map(
       (p) =>
-        `Манчкин: ${p.nickname}. Уровень: ${p.level}. Урон от шмоток: ${
-          p.damage
-        }. Общий урон: ${p.level + p.damage}`
+        `Манчкин: ${p.nickname}-${p.sex}.  Уровень: ${
+          p.level
+        }. Урон от шмоток: ${p.damage}. Общий урон: ${p.level + p.damage}`
     )
     .join("\n");
   return arr || "Комната пуста";

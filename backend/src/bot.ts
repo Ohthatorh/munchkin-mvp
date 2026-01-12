@@ -38,7 +38,10 @@ bot.command("start", (ctx) => {
         Markup.button.callback("🚪 Войти в комнату", "JOIN_ROOM"),
         Markup.button.callback("❌ Выйти из комнаты", "LEAVE_ROOM"),
       ],
-      [Markup.button.callback("📝 Установить ник", "SET_NICK")],
+      [
+        Markup.button.callback("📝 Установить ник", "SET_NICK"),
+        Markup.button.callback("👤 Установить пол", "SET_SEX"),
+      ],
       [
         Markup.button.callback("⬆️ Изменить уровень", "SET_LEVEL"),
         Markup.button.callback("⚔️ Изменить урон", "SET_DMG"),
@@ -47,7 +50,6 @@ bot.command("start", (ctx) => {
         Markup.button.callback("📊 Мои статы", "MY_STATS"),
         Markup.button.callback("🏟 Статистика комнаты", "ROOM_STATS"),
       ],
-      [Markup.button.callback("👤 Установить пол", "SET_SEX")],
     ])
   );
 });
@@ -108,9 +110,6 @@ bot.action(/LEVEL_(\d+)/, async (ctx) => {
 bot.action("SET_DMG", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
   if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
-  const room = rooms[0];
-
-  // Inline кнопки для урона 0-10
   const buttons: any[][] = [];
   for (let i = 0; i <= 10; i += 5) {
     const row = [];
@@ -188,7 +187,6 @@ bot.action("SEX_F", async (ctx) => {
   ctx.answerCbQuery();
 });
 
-// ===== Обработка текста через современный фильтр message("text") =====
 bot.on(message("text"), async (ctx) => {
   const input = ctx.message.text;
   const waitingFor = ctx.session.waitingFor;
