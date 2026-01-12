@@ -6,6 +6,7 @@ export interface Player {
   nickname: string;
   level: number;
   damage: number;
+  sex: string;
 }
 
 export interface Room {

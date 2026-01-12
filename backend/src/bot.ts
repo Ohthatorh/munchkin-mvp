@@ -1,4 +1,4 @@
-import { Markup, Telegraf } from "telegraf";
+import { Telegraf, Markup, session } from "telegraf";
 import {
   addPlayer,
   updatePlayer,
@@ -15,149 +15,175 @@ import "dotenv/config";
 const BOT_TOKEN = process.env.BOT_TOKEN || "<YOUR_BOT_TOKEN>";
 const bot = new Telegraf(BOT_TOKEN);
 
-// командой /join ABC123 игрок заходит
-bot.command("join", async (ctx) => {
-  const args = ctx.message.text.split(" ");
-  const roomCode = args[1]?.toUpperCase();
+// Подключаем сессии для временного хранения состояния пользователя
+bot.use(session());
 
-  if (!roomCode)
-    return ctx.reply("Используй: /join ID_КОМНАТЫ чтобы войти в комнату.");
-  if ((await roomExists(roomCode)) === false)
-    return ctx.reply(`Комнаты ${roomCode} не существует.`);
-  const roomKeys = await getRoomsForPlayer(ctx.from.id.toString());
-  if (roomKeys.includes(roomCode))
-    return ctx.reply(`Ты уже в комнате ${roomCode}.`);
-  if (roomKeys.length > 0 && roomKeys[0] !== roomCode) {
-    return ctx.reply(
-      `Ты уже комнате ${roomKeys[0]}. Пожалуйста, выйди из нее командой: /leave ${roomKeys[0]}.`
-    );
+type MySession = {
+  waitingFor?: "NICK" | "ROOM_CODE" | "LEVEL" | "DMG" | "SEX";
+};
+declare module "telegraf" {
+  interface Context {
+    session: MySession;
   }
-  const player: Player = {
-    id: ctx.from.id.toString(),
-    nickname: "",
-    level: 1,
-    damage: 0,
-  };
+}
 
-  try {
-    await addPlayer(roomCode, player);
-    ctx.reply(
-      `Ты в комнате ${roomCode}. Пожалуйста, напиши свой никнейм командой: /nick ВАШ_НИК.`
-    );
-  } catch (err: any) {
-    ctx.reply(`Ошибка: ${err.message}`);
-  }
-});
+// Главное меню
+const mainMenu = Markup.keyboard([
+  ["Войти в комнату", "Выйти из комнаты"],
+  ["Установить ник", "Изменить уровень", "Изменить урон"],
+  ["Мои статы", "Статистика комнаты"],
+  ["Установить пол"],
+])
+  .resize()
+  .oneTime();
 
-// игрок ставит ник
-bot.command("nick", async (ctx) => {
-  const args = ctx.message.text.split(" ");
-  const nick = args[1];
-  if (!nick) return ctx.reply("Используй: /nick ВАШ_НИК чтобы установить ник.");
-
-  // находим комнату игрока
-  const roomKeys = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!roomKeys.length)
-    return ctx.reply(
-      "Ты не в комнате. Используй /join ID_КОМНАТЫ для входа в комнату."
-    );
-
-  const roomCode = roomKeys[0];
-
-  try {
-    const updated = await updatePlayer(roomCode, ctx.from.id.toString(), {
-      nickname: nick,
-    });
-    ctx.reply(
-      `Твой ник - ${nick}. Ты - манчкин ${updated.level} уровня с ${updated.damage} уроном.`
-    );
-  } catch (err: any) {
-    ctx.reply(`Ошибка: ${err.message}`);
-  }
-});
-
-bot.command("lvl", async (ctx) => {
-  const args = ctx.message.text.split(" ");
-  const lvl = parseInt(args[1]);
-  if (isNaN(lvl) || lvl < 1 || lvl > 10)
-    return ctx.reply("Уровень должен быть от 1 до 10");
-
-  const roomKeys = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!roomKeys.length)
-    return ctx.reply(
-      "Ты не в комнате. Используй /join ID_КОМНАТЫ для входа в комнату."
-    );
-  const player = await getPlayer(roomKeys[0], ctx.from.id.toString());
-  if (player?.nickname.length! < 1) {
-    return ctx.reply("Сначала установи ник командой: /nick ВАШ_НИК.");
-  }
-  await updatePlayer(roomKeys[0], ctx.from.id.toString(), { level: lvl });
-  ctx.reply(`Твой уровень изменен. Теперь твой уровень ${lvl}.`);
-});
-
-bot.command("dmg", async (ctx) => {
-  const args = ctx.message.text.split(" ");
-  const dmg = parseInt(args[1]);
-  if (isNaN(dmg) || dmg < 0) return ctx.reply("Урон не может быть ниже нуля.");
-
-  const roomKeys = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!roomKeys.length)
-    return ctx.reply(
-      "Ты не в комнате. Используй /join ID_КОМНАТЫ для входа в комнату."
-    );
-  const player = await getPlayer(roomKeys[0], ctx.from.id.toString());
-  if (player?.nickname.length! < 1) {
-    return ctx.reply("Сначала установи ник командой: /nick ВАШ_НИК.");
-  }
-  await updatePlayer(roomKeys[0], ctx.from.id.toString(), { damage: dmg });
-  ctx.reply(`Твой урон изменен. Теперь твой урон ${dmg}.`);
-});
-
-bot.command("leave", async (ctx) => {
-  const args = ctx.message.text.split(" ");
-  const roomCode = args[1]?.toUpperCase();
-  if (!roomCode)
-    return ctx.reply("Используй: /leave ID_КОМНАТЫ для выхода из комнаты.");
-
-  if (!(await roomExists(roomCode)))
-    return ctx.reply(`Комнаты ${roomCode} не существует!`);
-
-  await leaveRoom(roomCode, ctx.from.id.toString());
-  ctx.reply(`Вы вышли из комнаты ${roomCode}.`);
-});
-
-bot.command("mystats", async (ctx) => {
-  const rooms = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!rooms.length) return ctx.reply("Ты не состоишь ни в одной комнате.");
-  const room = rooms[0];
-  const player = await getPlayer(room, ctx.from.id.toString());
-  if (!player) return ctx.reply(`Ты не состоишь в комнате ${room}.`);
-  if (player?.nickname.length! < 1) {
-    return ctx.reply("Сначала установи ник командой: /nick ВАШ_НИК.");
-  }
-
+// Старт бота
+bot.start((ctx) => {
+  ctx.session = {};
   ctx.reply(
-    `Комната: ${room}\nНик: ${player.nickname || "не установлен"}\nLVL: ${
-      player.level
-    }\nDMG: ${player.damage}`
+    `Привет, ${ctx.from.first_name}! Я бот для Munchkin. Выбери действие:`,
+    mainMenu
   );
 });
 
-bot.command("stats", async (ctx) => {
-  const playerId = ctx.from.id.toString();
+// ----------- ОБРАБОТКА REPLY КНОПОК -----------
 
-  // узнаем, в каких комнатах состоит игрок
-  const rooms = await getRoomsForPlayer(playerId);
-  if (rooms.length === 0) return ctx.reply("Вы не находитесь в комнате.");
+bot.hears("Войти в комнату", (ctx) => {
+  ctx.session.waitingFor = "ROOM_CODE";
+  ctx.reply("Напиши код комнаты (например: ABCD):");
+});
 
-  // если больше одной комнаты — можно пока брать первую
+bot.hears("Выйти из комнаты", async (ctx) => {
+  const rooms = await getRoomsForPlayer(ctx.from.id.toString());
+  if (!rooms.length) return ctx.reply("Ты не в комнате.");
+  // если несколько комнат — берём первую
   const room = rooms[0];
+  await leaveRoom(room, ctx.from.id.toString());
+  ctx.reply(`Вы вышли из комнаты ${room}`);
+});
 
-  const players = await getPlayers(room); // Record<string, Player>
+bot.hears("Установить ник", (ctx) => {
+  ctx.session.waitingFor = "NICK";
+  ctx.reply("Напиши свой ник:");
+});
 
+bot.hears("Изменить уровень", async (ctx) => {
+  ctx.session.waitingFor = "LEVEL";
+  ctx.reply("Напиши новый уровень (1-10):");
+});
+
+bot.hears("Изменить урон", (ctx) => {
+  ctx.session.waitingFor = "DMG";
+  ctx.reply("Напиши новый урон (0 и больше):");
+});
+
+bot.hears("Мои статы", async (ctx) => {
+  const rooms = await getRoomsForPlayer(ctx.from.id.toString());
+  if (!rooms.length) return ctx.reply("Ты не в комнате.");
+  const room = rooms[0];
+  const player = await getPlayer(room, ctx.from.id.toString());
+  if (!player) return ctx.reply("Ты не в комнате.");
+  if (!player.nickname) return ctx.reply("Сначала установи ник.");
+  ctx.reply(
+    `Комната: ${room}\nНик: ${player.nickname}\nLVL: ${player.level}\nDMG: ${player.damage}`
+  );
+});
+
+bot.hears("Статистика комнаты", async (ctx) => {
+  const rooms = await getRoomsForPlayer(ctx.from.id.toString());
+  if (!rooms.length) return ctx.reply("Ты не в комнате.");
+  const room = rooms[0];
+  const players = await getPlayers(room);
   const message = formatRoomStats(players);
   ctx.reply(`Статистика комнаты ${room}:\n\n${message}`);
 });
+
+bot.hears("Установить пол", (ctx) => {
+  ctx.session.waitingFor = "SEX";
+  ctx.reply(
+    "Выбери пол:",
+    Markup.keyboard([["мужчина", "женщина"]])
+      .resize()
+      .oneTime()
+  );
+});
+
+// ----------- ОБРАБОТКА ВВОДА СООБЩЕНИЙ -----------
+
+bot.on("text", async (ctx) => {
+  const input = ctx.message.text;
+  const waitingFor = ctx.session.waitingFor;
+
+  if (!waitingFor) return; // ничего не ждем
+
+  const playerId = ctx.from.id.toString();
+  const rooms = await getRoomsForPlayer(playerId);
+  const room = rooms[0];
+
+  switch (waitingFor) {
+    case "ROOM_CODE":
+      const roomCode = input.toUpperCase();
+      if (!(await roomExists(roomCode)))
+        return ctx.reply(`Комнаты ${roomCode} не существует.`);
+      const roomKeys = await getRoomsForPlayer(playerId);
+      if (roomKeys.includes(roomCode))
+        return ctx.reply(`Ты уже в комнате ${roomCode}.`);
+      if (roomKeys.length > 0 && roomKeys[0] !== roomCode)
+        return ctx.reply(
+          `Ты уже в комнате ${roomKeys[0]}. Выйди из нее командой "Выйти из комнаты".`
+        );
+
+      const player: Player = {
+        id: playerId,
+        nickname: "",
+        level: 1,
+        damage: 0,
+        sex: "мужчина",
+      };
+
+      await addPlayer(roomCode, player);
+      ctx.reply(
+        `Ты вошел в комнату ${roomCode}. Напиши ник командой "Установить ник".`
+      );
+      break;
+
+    case "NICK":
+      if (!room) return ctx.reply("Ты не в комнате.");
+      await updatePlayer(room, playerId, { nickname: input });
+      ctx.reply(`Ник установлен: ${input}`);
+      break;
+
+    case "LEVEL":
+      if (!room) return ctx.reply("Ты не в комнате.");
+      const lvl = parseInt(input);
+      if (isNaN(lvl) || lvl < 1 || lvl > 10)
+        return ctx.reply("Уровень должен быть 1-10.");
+      await updatePlayer(room, playerId, { level: lvl });
+      ctx.reply(`Уровень установлен: ${lvl}`);
+      break;
+
+    case "DMG":
+      if (!room) return ctx.reply("Ты не в комнате.");
+      const dmg = parseInt(input);
+      if (isNaN(dmg) || dmg < 0)
+        return ctx.reply("Урон не может быть меньше 0.");
+      await updatePlayer(room, playerId, { damage: dmg });
+      ctx.reply(`Урон установлен: ${dmg}`);
+      break;
+
+    case "SEX":
+      if (!room) return ctx.reply("Ты не в комнате.");
+      if (input !== "мужчина" && input !== "женщина")
+        return ctx.reply("Выбери: мужчина или женщина");
+      await updatePlayer(room, playerId, { sex: input });
+      ctx.reply(`Пол установлен: ${input}`);
+      break;
+  }
+
+  ctx.session.waitingFor = undefined; // сбрасываем ожидание
+});
+
+// ----------- ЗАПУСК БОТА -----------
 
 bot.launch();
 console.log("Telegram bot started");
