@@ -9,6 +9,7 @@ interface Player {
   nickname: string;
   level: number;
   damage: number;
+  sex: string;
 }
 
 export default function Room() {
@@ -49,6 +50,7 @@ export default function Room() {
         <thead>
           <tr>
             <th>Ник</th>
+            <th>Пол</th>
             <th>Уровень</th>
             <th>Шмотки</th>
             <th>Общий урон</th>
@@ -58,6 +60,7 @@ export default function Room() {
           {players.map((p) => (
             <tr key={p.id}>
               <td>{p.nickname}</td>
+              <td>{p.sex}</td>
               <td>{p.level}</td>
               <td>{p.damage}</td>
               <td>{p.damage + p.level}</td>
