@@ -185,7 +185,7 @@ bot.action(/LEVEL_(\d+)/, async (ctx) => {
 
   // удаляем сообщение предыдущее
   try {
-    await ctx.editMessageReplyMarkup(null!);
+    await ctx.deleteMessage();
   } catch {}
 
   ctx.reply(
