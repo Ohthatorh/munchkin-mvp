@@ -31,7 +31,7 @@ const buttons = [
   },
   {
     code: "SET_SEX",
-    callback: Markup.button.callback("👤 Установить пол", "SET_SEX"),
+    callback: Markup.button.callback("👤 Изменить пол", "SET_SEX"),
   },
   {
     code: "SET_LEVEL",
@@ -51,7 +51,7 @@ const buttons = [
   },
 ];
 
-function sortButtons(codes: string[]) {
+function getButton(codes: string[]) {
   return buttons
     .filter((btn) => codes.includes(btn.code))
     .map((btn) => btn.callback);
@@ -115,14 +115,14 @@ bot.command("start", (ctx) => {
   ctx.reply(
     `Привет, ${ctx.from.first_name}! Выбери действие:`,
     Markup.inlineKeyboard([
-      sortButtons(["JOIN_ROOM"]),
-      sortButtons(["LEAVE_ROOM"]),
-      sortButtons(["SET_NICK"]),
-      sortButtons(["SET_SEX"]),
-      sortButtons(["SET_LEVEL"]),
-      sortButtons(["SET_DMG"]),
-      sortButtons(["MY_STATS"]),
-      sortButtons(["ROOM_STATS"]),
+      getButton(["JOIN_ROOM"]),
+      getButton(["LEAVE_ROOM"]),
+      getButton(["SET_NICK"]),
+      getButton(["SET_SEX"]),
+      getButton(["SET_LEVEL"]),
+      getButton(["SET_DMG"]),
+      getButton(["MY_STATS"]),
+      getButton(["ROOM_STATS"]),
     ])
   );
 });
@@ -335,7 +335,10 @@ bot.on(message("text"), async (ctx) => {
       await addPlayer(roomCode, player);
       ctx.reply(
         `Ты вошел в комнату ${roomCode} 🚪. Установи ник:`,
-        Markup.inlineKeyboard([sortButtons(["SET_NICK", "LEAVE_ROOM"])])
+        Markup.inlineKeyboard([
+          getButton(["SET_NICK"]),
+          getButton(["LEAVE_ROOM"]),
+        ])
       );
       break;
 
@@ -343,6 +346,17 @@ bot.on(message("text"), async (ctx) => {
       if (!room) return ctx.reply("Ты не в комнате ❌");
       await updatePlayer(room, playerId, { nickname: input });
       ctx.reply(`Ник установлен: 📝 ${input}`);
+      ctx.reply(
+        `Ник установлен: 📝 ${input}`,
+        Markup.inlineKeyboard([
+          getButton(["SET_LEVEL"]),
+          getButton(["SET_DMG"]),
+          getButton(["SET_SEX"]),
+          getButton(["ROOM_STATS"]),
+          getButton(["MY_STATS"]),
+          getButton(["LEAVE_ROOM"]),
+        ])
+      );
       break;
   }
 
