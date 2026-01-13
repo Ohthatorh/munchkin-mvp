@@ -16,12 +16,53 @@ import "dotenv/config";
 const BOT_TOKEN = process.env.BOT_TOKEN || "<YOUR_BOT_TOKEN>";
 const bot = new Telegraf(BOT_TOKEN);
 
+const buttons = [
+  {
+    code: "JOIN_ROOM",
+    callback: Markup.button.callback("🚪 Войти в комнату", "JOIN_ROOM"),
+  },
+  {
+    code: "LEAVE_ROOM",
+    callback: Markup.button.callback("❌ Выйти из комнаты", "LEAVE_ROOM"),
+  },
+  {
+    code: "SET_NICK",
+    callback: Markup.button.callback("📝 Установить ник", "SET_NICK"),
+  },
+  {
+    code: "SET_SEX",
+    callback: Markup.button.callback("👤 Установить пол", "SET_SEX"),
+  },
+  {
+    code: "SET_LEVEL",
+    callback: Markup.button.callback("⬆️ Изменить уровень", "SET_LEVEL"),
+  },
+  {
+    code: "SET_DMG",
+    callback: Markup.button.callback("⚔️ Изменить урон", "SET_DMG"),
+  },
+  {
+    code: "MY_STATS",
+    callback: Markup.button.callback("📊 Мои статы", "MY_STATS"),
+  },
+  {
+    code: "ROOM_STATS",
+    callback: Markup.button.callback("🏟 Статистика комнаты", "ROOM_STATS"),
+  },
+];
+
+function sortButtons(codes: string[]) {
+  return buttons
+    .filter((btn) => codes.includes(btn.code))
+    .map((btn) => btn.callback);
+}
+
 // ===== Сессии =====
 bot.use(session());
 
 type MySession = {
   waitingFor?: "NICK" | "ROOM_CODE";
-  dmgPage?: number; // from 0 to 9 → 1..100
+  dmgPage?: number;
 };
 declare module "telegraf" {
   interface Context {
@@ -74,22 +115,16 @@ bot.command("start", (ctx) => {
   ctx.reply(
     `Привет, ${ctx.from.first_name}! Выбери действие:`,
     Markup.inlineKeyboard([
-      [
-        Markup.button.callback("🚪 Войти в комнату", "JOIN_ROOM"),
-        Markup.button.callback("❌ Выйти из комнаты", "LEAVE_ROOM"),
-      ],
-      [
-        Markup.button.callback("📝 Установить ник", "SET_NICK"),
-        Markup.button.callback("👤 Установить пол", "SET_SEX"),
-      ],
-      [
-        Markup.button.callback("⬆️ Изменить уровень", "SET_LEVEL"),
-        Markup.button.callback("⚔️ Изменить урон", "SET_DMG"),
-      ],
-      [
-        Markup.button.callback("📊 Мои статы", "MY_STATS"),
-        Markup.button.callback("🏟 Статистика комнаты", "ROOM_STATS"),
-      ],
+      sortButtons([
+        "JOIN_ROOM",
+        "LEAVE_ROOM",
+        "SET_NICK",
+        "SET_SEX",
+        "SET_LEVEL",
+        "SET_DMG",
+        "MY_STATS",
+        "ROOM_STATS",
+      ]),
     ])
   );
 });
@@ -300,7 +335,10 @@ bot.on(message("text"), async (ctx) => {
       };
 
       await addPlayer(roomCode, player);
-      ctx.reply(`Ты вошел в комнату ${roomCode} 🚪. Напиши ник 📝`);
+      ctx.reply(
+        `Ты вошел в комнату ${roomCode} 🚪. Установи ник:`,
+        Markup.inlineKeyboard([sortButtons(["SET_NICK", "LEAVE_ROOM"])])
+      );
       break;
 
     case "NICK":
