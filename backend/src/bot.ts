@@ -128,7 +128,11 @@ bot.action("JOIN_ROOM", (ctx) => {
 
 bot.action("LEAVE_ROOM", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
+  if (!rooms.length)
+    return ctx.reply(
+      "Ты не в комнате ❌",
+      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
+    );
   const room = rooms[0];
   await leaveRoom(room, ctx.from.id.toString());
 
@@ -149,7 +153,11 @@ bot.action("SET_NICK", (ctx) => {
 
 bot.action("SET_LEVEL", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
+  if (!rooms.length)
+    return ctx.reply(
+      "Ты не в комнате ❌",
+      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
+    );
 
   const buttons: any[][] = [];
   for (let i = 1; i <= 10; i += 5) {
@@ -166,14 +174,18 @@ bot.action("SET_LEVEL", async (ctx) => {
 bot.action(/LEVEL_(\d+)/, async (ctx) => {
   const lvl = parseInt(ctx.match[1]);
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
+  if (!rooms.length)
+    return ctx.reply(
+      "Ты не в комнате ❌",
+      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
+    );
 
   const room = rooms[0];
   await updatePlayer(room, ctx.from.id.toString(), { level: lvl });
 
-  // удаляем кнопки
+  // удаляем сообщение предыдущее
   try {
-    await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
+    await ctx.editMessageReplyMarkup(null!);
   } catch {}
 
   ctx.reply(
@@ -194,7 +206,11 @@ bot.action(/LEVEL_(\d+)/, async (ctx) => {
 
 bot.action("SET_DMG", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
+  if (!rooms.length)
+    return ctx.reply(
+      "Ты не в комнате ❌",
+      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
+    );
 
   ctx.session.dmgPage = 0;
   ctx.reply("Выбери урон ⚔️:", dmgKeyboard(0));
@@ -220,11 +236,16 @@ bot.action("DMG_RIGHT", async (ctx) => {
 bot.action(/DMG_SET_(\d+)/, async (ctx) => {
   const dmg = parseInt(ctx.match[1]);
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
+  if (!rooms.length)
+    return ctx.reply(
+      "Ты не в комнате ❌",
+      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
+    );
 
   const room = rooms[0];
   await updatePlayer(room, ctx.from.id.toString(), { damage: dmg });
 
+  // удаляем предыдущее сообщение
   try {
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
   } catch {}
@@ -245,10 +266,18 @@ bot.action(/DMG_SET_(\d+)/, async (ctx) => {
 
 bot.action("MY_STATS", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
+  if (!rooms.length)
+    return ctx.reply(
+      "Ты не в комнате ❌",
+      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
+    );
   const room = rooms[0];
   const player = await getPlayer(room, ctx.from.id.toString());
-  if (!player) return ctx.reply("Ты не в комнате ❌");
+  if (!player)
+    return ctx.reply(
+      "Ты не в комнате ❌",
+      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
+    );
   if (!player.nickname) return ctx.reply("Сначала установи ник 📝");
 
   ctx.reply(
@@ -272,7 +301,11 @@ bot.action("MY_STATS", async (ctx) => {
 
 bot.action("ROOM_STATS", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
+  if (!rooms.length)
+    return ctx.reply(
+      "Ты не в комнате ❌",
+      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
+    );
   const room = rooms[0];
   const players = await getPlayers(room);
   ctx.reply(
@@ -304,10 +337,14 @@ bot.action("SET_SEX", (ctx) => {
 
 bot.action("SEX_M", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
+  if (!rooms.length)
+    return ctx.reply(
+      "Ты не в комнате ❌",
+      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
+    );
   const room = rooms[0];
   await updatePlayer(room, ctx.from.id.toString(), { sex: "мужчина" });
-
+  // удаляем предыдущее сообщение
   try {
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
   } catch {}
@@ -328,10 +365,15 @@ bot.action("SEX_M", async (ctx) => {
 
 bot.action("SEX_F", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
+  if (!rooms.length)
+    return ctx.reply(
+      "Ты не в комнате ❌",
+      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
+    );
   const room = rooms[0];
   await updatePlayer(room, ctx.from.id.toString(), { sex: "женщина" });
 
+  // удаляем предыдущее сообщение
   try {
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
   } catch {}
@@ -365,12 +407,18 @@ bot.on(message("text"), async (ctx) => {
     case "ROOM_CODE":
       const roomCode = input.toUpperCase();
       if (!(await roomExists(roomCode)))
-        return ctx.reply(`Комнаты ${roomCode} не существует ❌`);
+        return ctx.reply(
+          `Комнаты ${roomCode} не существует ❌`,
+          Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
+        );
       const roomKeys = await getRoomsForPlayer(playerId);
       if (roomKeys.includes(roomCode))
         return ctx.reply(`Ты уже в комнате ${roomCode} 🚪`);
       if (roomKeys.length > 0 && roomKeys[0] !== roomCode)
-        return ctx.reply(`Ты уже в комнате ${roomKeys[0]}, выйди из нее ❌`);
+        return ctx.reply(
+          `Ты уже в комнате ${roomKeys[0]}, выйди из нее ❌`,
+          Markup.inlineKeyboard([getButton(["LEAVE_ROOM"])])
+        );
 
       const player: Player = {
         id: playerId,

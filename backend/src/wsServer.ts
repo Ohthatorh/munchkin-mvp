@@ -46,8 +46,8 @@ wss.on("connection", (ws) => {
 export async function broadcastRoomState(roomCode: string) {
   if (!rooms[roomCode]) return;
 
-  const playersObj = await getPlayers(roomCode); // Record<string, Player>
-  const players = Object.values(playersObj); // Player[]
+  const playersObj = await getPlayers(roomCode);
+  const players = Object.values(playersObj);
 
   const msg = JSON.stringify({ type: "ROOM_STATE", data: players });
   rooms[roomCode].forEach((client) => client.send(msg));
