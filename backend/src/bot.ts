@@ -111,34 +111,52 @@ function dmgKeyboard(page: number) {
 
 // ===== Главное меню =====
 bot.command("start", async (ctx) => {
-  ctx.session = {};
-  // const rooms = await getRoomsForPlayer(ctx.from.id.toString());
-  // if (rooms.length) {
-  //   ctx.session.dmgPage = 0;
-  //   ctx.session.waitingFor = undefined;
-  //   const room = rooms[0];
-  //   const player = await getPlayer(room, ctx.from.id.toString());
-  //   return ctx.reply(
-  //     `📌 Комната: ${room}\n` +
-  //       `👤 Ник: ${player!.nickname}\n` +
-  //       `⬆️ LVL: ${player!.level}\n` +
-  //       `⚔️ DMG: ${player!.damage}\n` +
-  //       `🎯 TOTAL: ${player!.level + player!.damage}\n` +
-  //       `🧑‍🤝‍🧑 Пол: ${player!.sex}`,
-  //     Markup.inlineKeyboard([
-  //       getButton(["SET_LEVEL"]),
-  //       getButton(["SET_DMG"]),
-  //       getButton(["SET_SEX"]),
-  //       getButton(["ROOM_STATS"]),
-  //       getButton(["MY_STATS"]),
-  //       getButton(["LEAVE_ROOM"]),
-  //     ])
-  //   );
-  // }
-  ctx.reply(
-    `Привет, ${ctx.from.first_name}! Выбери действие:`,
-    Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
-  );
+  const playerId = ctx.from.id.toString();
+
+  // Если сессии ещё нет — создаём пустую
+  if (!ctx.session) ctx.session = {};
+
+  const rooms = await getRoomsForPlayer(playerId);
+
+  if (rooms.length) {
+    // Игрок уже в комнате — восстанавливаем состояние
+    ctx.session.dmgPage = ctx.session.dmgPage ?? 0;
+    ctx.session.waitingFor = undefined;
+
+    const room = rooms[0];
+    const player = await getPlayer(room, playerId);
+    if (!player) {
+      // на всякий случай, если игрока нет в комнате
+      ctx.reply(
+        `Что-то пошло не так, ты в комнате ${room}, но тебя там нет.`,
+        Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
+      );
+      return;
+    }
+
+    return ctx.reply(
+      `📌 Комната: ${room}\n` +
+        `👤 Ник: ${player.nickname || "не установлен"}\n` +
+        `⬆️ LVL: ${player.level}\n` +
+        `⚔️ DMG: ${player.damage}\n` +
+        `🎯 TOTAL: ${player.level + player.damage}\n` +
+        `🧑‍🤝‍🧑 Пол: ${player.sex}`,
+      Markup.inlineKeyboard([
+        getButton(["SET_LEVEL"]),
+        getButton(["SET_DMG"]),
+        getButton(["SET_SEX"]),
+        getButton(["ROOM_STATS"]),
+        getButton(["MY_STATS"]),
+        getButton(["LEAVE_ROOM"]),
+      ])
+    );
+  } else {
+    // Игрок не в комнате — обычный старт
+    ctx.reply(
+      `Привет, ${ctx.from.first_name}! Выбери действие:`,
+      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
+    );
+  }
 });
 
 // ===== Действия =====

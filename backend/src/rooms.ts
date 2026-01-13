@@ -121,7 +121,7 @@ export function formatRoomStats(players: Record<string, Player>): string {
     result += `${levelEmoji} Уровень: ${p.level}\n`;
     result += `${dmgEmoji} Урон от шмота: ${p.damage}\n`;
     result += `${totalEmoji} Общий урон: ${p.level + p.damage}\n`;
-    result += `────────────────────\n`; // разделитель между игроками
+    result += `────────────────────\n`;
   }
 
   return result;
