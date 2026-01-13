@@ -20,15 +20,17 @@ const bot = new Telegraf(BOT_TOKEN);
 bot.use(session());
 
 type MySession = {
-  waitingFor?: "NICK" | "ROOM_CODE";
+  waitingFor?: "NICK" | "ROOM_CODE" | "DMG";
+  dmgRange?: number; // диапазон DMG (0 => 1..10, 1 => 11..20, ...)
 };
+
 declare module "telegraf" {
   interface Context {
     session: MySession;
   }
 }
 
-// ===== Главное меню (inline) =====
+// ===== Главное меню =====
 bot.command("start", (ctx) => {
   ctx.session = {};
   ctx.reply(
@@ -54,13 +56,14 @@ bot.command("start", (ctx) => {
   );
 });
 
-// ===== Действия кнопок =====
+// ===== JOIN ROOM =====
 bot.action("JOIN_ROOM", (ctx) => {
   ctx.session.waitingFor = "ROOM_CODE";
   ctx.reply("Напиши код комнаты (например: ABCD) 🔑:");
   ctx.answerCbQuery();
 });
 
+// ===== LEAVE =====
 bot.action("LEAVE_ROOM", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
   if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
@@ -70,20 +73,18 @@ bot.action("LEAVE_ROOM", async (ctx) => {
   ctx.answerCbQuery();
 });
 
+// ===== SET NICK =====
 bot.action("SET_NICK", (ctx) => {
   ctx.session.waitingFor = "NICK";
   ctx.reply("Напиши свой ник 📝:");
   ctx.answerCbQuery();
 });
 
+// ===== SET LEVEL =====
 bot.action("SET_LEVEL", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
   if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
-  const room = rooms[0];
-  const player = await getPlayer(room, ctx.from.id.toString());
-  if (!player) return ctx.reply("Ты не в комнате ❌");
 
-  // Inline кнопки для уровня 1-10
   const buttons: any[][] = [];
   for (let i = 1; i <= 10; i += 5) {
     const row = [];
@@ -101,61 +102,80 @@ bot.action(/LEVEL_(\d+)/, async (ctx) => {
   const lvl = parseInt(ctx.match[1]);
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
   if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
+
   const room = rooms[0];
   await updatePlayer(room, ctx.from.id.toString(), { level: lvl });
+
+  await ctx.editMessageReplyMarkup(null);
   ctx.reply(`Твой уровень теперь ⬆️ ${lvl}`);
   ctx.answerCbQuery();
 });
 
+// ===== SET DMG =====
 bot.action("SET_DMG", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
   if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
-  const buttons: any[][] = [];
-  for (let i = 0; i <= 10; i += 5) {
-    const row = [];
-    for (let j = i; j < i + 5 && j <= 10; j++) {
-      row.push(Markup.button.callback(`${j}⚔️`, `DMG_${j}`));
-    }
-    buttons.push(row);
-  }
 
-  ctx.reply("Выбери урон ⚔️:", Markup.inlineKeyboard(buttons));
+  ctx.session.waitingFor = "DMG";
+  ctx.session.dmgRange = 0;
+
+  sendDmgKeyboard(ctx);
   ctx.answerCbQuery();
 });
 
+// ===== Генератор клавы DMG =====
+function sendDmgKeyboard(ctx) {
+  const range = ctx.session.dmgRange ?? 0;
+  const start = range * 10 + 1;
+  const end = Math.min(start + 9, 100);
+
+  const dmgButtons = [];
+
+  for (let i = start; i <= end; i++) {
+    dmgButtons.push(Markup.button.callback(`${i}⚔️`, `DMG_${i}`));
+  }
+
+  const row = [
+    Markup.button.callback("◀️", "DMG_LEFT"),
+    ...dmgButtons,
+    Markup.button.callback("▶️", "DMG_RIGHT"),
+  ];
+
+  ctx.reply("Выбери урон ⚔️:", Markup.inlineKeyboard([row]));
+}
+
+// ===== Пагинация DMG =====
+bot.action("DMG_LEFT", async (ctx) => {
+  ctx.session.dmgRange = Math.max(0, (ctx.session.dmgRange ?? 0) - 1);
+
+  await ctx.editMessageReplyMarkup(null);
+  sendDmgKeyboard(ctx);
+  ctx.answerCbQuery();
+});
+
+bot.action("DMG_RIGHT", async (ctx) => {
+  ctx.session.dmgRange = Math.min(9, (ctx.session.dmgRange ?? 0) + 1); // 100 max → 0-9
+
+  await ctx.editMessageReplyMarkup(null);
+  sendDmgKeyboard(ctx);
+  ctx.answerCbQuery();
+});
+
+// ===== Выбор DMG =====
 bot.action(/DMG_(\d+)/, async (ctx) => {
   const dmg = parseInt(ctx.match[1]);
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
   if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
+
   const room = rooms[0];
   await updatePlayer(room, ctx.from.id.toString(), { damage: dmg });
+
+  await ctx.editMessageReplyMarkup(null);
   ctx.reply(`Твой урон теперь ⚔️ ${dmg}`);
   ctx.answerCbQuery();
 });
 
-bot.action("MY_STATS", async (ctx) => {
-  const rooms = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
-  const room = rooms[0];
-  const player = await getPlayer(room, ctx.from.id.toString());
-  if (!player) return ctx.reply("Ты не в комнате ❌");
-  if (!player.nickname) return ctx.reply("Сначала установи ник 📝");
-  ctx.reply(
-    `📌 Комната: ${room}\n👤 Ник: ${player.nickname}\n⬆️ LVL: ${player.level}\n⚔️ DMG: ${player.damage}\n🧑‍🤝‍🧑 Пол: ${player.sex}`
-  );
-  ctx.answerCbQuery();
-});
-
-bot.action("ROOM_STATS", async (ctx) => {
-  const rooms = await getRoomsForPlayer(ctx.from.id.toString());
-  if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
-  const room = rooms[0];
-  const players = await getPlayers(room);
-  const message = formatRoomStats(players);
-  ctx.reply(`🏟 Статистика комнаты ${room}:\n\n${message}`);
-  ctx.answerCbQuery();
-});
-
+// ===== SET SEX =====
 bot.action("SET_SEX", (ctx) => {
   ctx.reply(
     "Выбери пол 👤:",
@@ -172,8 +192,11 @@ bot.action("SET_SEX", (ctx) => {
 bot.action("SEX_M", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
   if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
+
   const room = rooms[0];
   await updatePlayer(room, ctx.from.id.toString(), { sex: "мужчина" });
+
+  await ctx.editMessageReplyMarkup(null);
   ctx.reply("Пол установлен: 🧑 Мужчина");
   ctx.answerCbQuery();
 });
@@ -181,12 +204,46 @@ bot.action("SEX_M", async (ctx) => {
 bot.action("SEX_F", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
   if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
+
   const room = rooms[0];
   await updatePlayer(room, ctx.from.id.toString(), { sex: "женщина" });
+
+  await ctx.editMessageReplyMarkup(null);
   ctx.reply("Пол установлен: 👩 Женщина");
   ctx.answerCbQuery();
 });
 
+// ===== MY STATS =====
+bot.action("MY_STATS", async (ctx) => {
+  const rooms = await getRoomsForPlayer(ctx.from.id.toString());
+  if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
+
+  const room = rooms[0];
+  const player = await getPlayer(room, ctx.from.id.toString());
+  if (!player) return ctx.reply("Ты не в комнате ❌");
+
+  if (!player.nickname) return ctx.reply("Сначала установи ник 📝");
+
+  ctx.reply(
+    `📌 Комната: ${room}\n👤 Ник: ${player.nickname}\n⬆️ LVL: ${player.level}\n⚔️ DMG: ${player.damage}\n🧑‍🤝‍🧑 Пол: ${player.sex}`
+  );
+  ctx.answerCbQuery();
+});
+
+// ===== ROOM STATS =====
+bot.action("ROOM_STATS", async (ctx) => {
+  const rooms = await getRoomsForPlayer(ctx.from.id.toString());
+  if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
+
+  const room = rooms[0];
+  const players = await getPlayers(room);
+
+  const message = formatRoomStats(players);
+  ctx.reply(`🏟 Статистика комнаты ${room}:\n\n${message}`);
+  ctx.answerCbQuery();
+});
+
+// ===== Текстовые ввода =====
 bot.on(message("text"), async (ctx) => {
   const input = ctx.message.text;
   const waitingFor = ctx.session.waitingFor;
@@ -201,6 +258,7 @@ bot.on(message("text"), async (ctx) => {
       const roomCode = input.toUpperCase();
       if (!(await roomExists(roomCode)))
         return ctx.reply(`Комнаты ${roomCode} не существует ❌`);
+
       const roomKeys = await getRoomsForPlayer(playerId);
       if (roomKeys.includes(roomCode))
         return ctx.reply(`Ты уже в комнате ${roomCode} 🚪`);
@@ -213,7 +271,7 @@ bot.on(message("text"), async (ctx) => {
         id: playerId,
         nickname: "",
         level: 1,
-        damage: 0,
+        damage: 1,
         sex: "мужчина",
       };
 
