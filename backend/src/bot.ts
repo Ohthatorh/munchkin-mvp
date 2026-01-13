@@ -284,7 +284,17 @@ bot.action("SEX_M", async (ctx) => {
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
   } catch {}
 
-  ctx.reply("Пол установлен: 🧑 Мужчина");
+  ctx.reply(
+    "Пол установлен: 🧑 Мужчина",
+    Markup.inlineKeyboard([
+      getButton(["SET_LEVEL"]),
+      getButton(["SET_DMG"]),
+      getButton(["SET_SEX"]),
+      getButton(["ROOM_STATS"]),
+      getButton(["MY_STATS"]),
+      getButton(["LEAVE_ROOM"]),
+    ])
+  );
   ctx.answerCbQuery();
 });
 
@@ -298,7 +308,17 @@ bot.action("SEX_F", async (ctx) => {
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
   } catch {}
 
-  ctx.reply("Пол установлен: 👩 Женщина");
+  ctx.reply(
+    "Пол установлен: 👩 Женщина",
+    Markup.inlineKeyboard([
+      getButton(["SET_LEVEL"]),
+      getButton(["SET_DMG"]),
+      getButton(["SET_SEX"]),
+      getButton(["ROOM_STATS"]),
+      getButton(["MY_STATS"]),
+      getButton(["LEAVE_ROOM"]),
+    ])
+  );
   ctx.answerCbQuery();
 });
 
@@ -345,7 +365,6 @@ bot.on(message("text"), async (ctx) => {
     case "NICK":
       if (!room) return ctx.reply("Ты не в комнате ❌");
       await updatePlayer(room, playerId, { nickname: input });
-      ctx.reply(`Ник установлен: 📝 ${input}`);
       ctx.reply(
         `Ник установлен: 📝 ${input}`,
         Markup.inlineKeyboard([
