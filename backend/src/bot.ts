@@ -140,7 +140,18 @@ bot.action("LEAVE_ROOM", async (ctx) => {
   if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
   const room = rooms[0];
   await leaveRoom(room, ctx.from.id.toString());
-  ctx.reply(`Ты вышел из комнаты ${room} 🚪`);
+
+  ctx.reply(
+    `Ты вышел из комнаты ${room} 🚪`,
+    Markup.inlineKeyboard([
+      getButton(["SET_LEVEL"]),
+      getButton(["SET_DMG"]),
+      getButton(["SET_SEX"]),
+      getButton(["ROOM_STATS"]),
+      getButton(["MY_STATS"]),
+      getButton(["LEAVE_ROOM"]),
+    ])
+  );
   ctx.answerCbQuery();
 });
 
@@ -181,7 +192,17 @@ bot.action(/LEVEL_(\d+)/, async (ctx) => {
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
   } catch {}
 
-  ctx.reply(`Твой уровень теперь ⬆️ ${lvl}`);
+  ctx.reply(
+    `Твой уровень теперь ⬆️ ${lvl}`,
+    Markup.inlineKeyboard([
+      getButton(["SET_LEVEL"]),
+      getButton(["SET_DMG"]),
+      getButton(["SET_SEX"]),
+      getButton(["ROOM_STATS"]),
+      getButton(["MY_STATS"]),
+      getButton(["LEAVE_ROOM"]),
+    ])
+  );
   ctx.answerCbQuery();
 });
 
@@ -220,16 +241,23 @@ bot.action(/DMG_SET_(\d+)/, async (ctx) => {
   const room = rooms[0];
   await updatePlayer(room, ctx.from.id.toString(), { damage: dmg });
 
-  // удаляем кнопки
   try {
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
   } catch {}
 
-  ctx.reply(`Твой урон теперь ⚔️ ${dmg}`);
+  ctx.reply(
+    `Твой урон теперь ⚔️ ${dmg}`,
+    Markup.inlineKeyboard([
+      getButton(["SET_LEVEL"]),
+      getButton(["SET_DMG"]),
+      getButton(["SET_SEX"]),
+      getButton(["ROOM_STATS"]),
+      getButton(["MY_STATS"]),
+      getButton(["LEAVE_ROOM"]),
+    ])
+  );
   ctx.answerCbQuery();
 });
-
-// ===== STATS =====
 
 bot.action("MY_STATS", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
@@ -245,7 +273,15 @@ bot.action("MY_STATS", async (ctx) => {
       `⬆️ LVL: ${player.level}\n` +
       `⚔️ DMG: ${player.damage}\n` +
       `🎯 TOTAL: ${player.level + player.damage}\n` +
-      `🧑‍🤝‍🧑 Пол: ${player.sex}`
+      `🧑‍🤝‍🧑 Пол: ${player.sex}`,
+    Markup.inlineKeyboard([
+      getButton(["SET_LEVEL"]),
+      getButton(["SET_DMG"]),
+      getButton(["SET_SEX"]),
+      getButton(["ROOM_STATS"]),
+      getButton(["MY_STATS"]),
+      getButton(["LEAVE_ROOM"]),
+    ])
   );
   ctx.answerCbQuery();
 });
@@ -255,11 +291,19 @@ bot.action("ROOM_STATS", async (ctx) => {
   if (!rooms.length) return ctx.reply("Ты не в комнате ❌");
   const room = rooms[0];
   const players = await getPlayers(room);
-  ctx.reply(`🏟 Комната ${room}:\n\n${formatRoomStats(players)}`);
+  ctx.reply(
+    `🏟 Комната ${room}:\n\n${formatRoomStats(players)}`,
+    Markup.inlineKeyboard([
+      getButton(["SET_LEVEL"]),
+      getButton(["SET_DMG"]),
+      getButton(["SET_SEX"]),
+      getButton(["ROOM_STATS"]),
+      getButton(["MY_STATS"]),
+      getButton(["LEAVE_ROOM"]),
+    ])
+  );
   ctx.answerCbQuery();
 });
-
-// ===== SEX =====
 
 bot.action("SET_SEX", (ctx) => {
   ctx.reply(
