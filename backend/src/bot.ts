@@ -112,27 +112,29 @@ function dmgKeyboard(page: number) {
 // ===== Главное меню =====
 bot.command("start", async (ctx) => {
   ctx.session = {};
-  const rooms = await getRoomsForPlayer(ctx.from.id.toString());
-  if (rooms.length) {
-    const room = rooms[0];
-    const player = await getPlayer(room, ctx.from.id.toString());
-    return ctx.reply(
-      `📌 Комната: ${room}\n` +
-        `👤 Ник: ${player!.nickname}\n` +
-        `⬆️ LVL: ${player!.level}\n` +
-        `⚔️ DMG: ${player!.damage}\n` +
-        `🎯 TOTAL: ${player!.level + player!.damage}\n` +
-        `🧑‍🤝‍🧑 Пол: ${player!.sex}`,
-      Markup.inlineKeyboard([
-        getButton(["SET_LEVEL"]),
-        getButton(["SET_DMG"]),
-        getButton(["SET_SEX"]),
-        getButton(["ROOM_STATS"]),
-        getButton(["MY_STATS"]),
-        getButton(["LEAVE_ROOM"]),
-      ])
-    );
-  }
+  // const rooms = await getRoomsForPlayer(ctx.from.id.toString());
+  // if (rooms.length) {
+  //   ctx.session.dmgPage = 0;
+  //   ctx.session.waitingFor = undefined;
+  //   const room = rooms[0];
+  //   const player = await getPlayer(room, ctx.from.id.toString());
+  //   return ctx.reply(
+  //     `📌 Комната: ${room}\n` +
+  //       `👤 Ник: ${player!.nickname}\n` +
+  //       `⬆️ LVL: ${player!.level}\n` +
+  //       `⚔️ DMG: ${player!.damage}\n` +
+  //       `🎯 TOTAL: ${player!.level + player!.damage}\n` +
+  //       `🧑‍🤝‍🧑 Пол: ${player!.sex}`,
+  //     Markup.inlineKeyboard([
+  //       getButton(["SET_LEVEL"]),
+  //       getButton(["SET_DMG"]),
+  //       getButton(["SET_SEX"]),
+  //       getButton(["ROOM_STATS"]),
+  //       getButton(["MY_STATS"]),
+  //       getButton(["LEAVE_ROOM"]),
+  //     ])
+  //   );
+  // }
   ctx.reply(
     `Привет, ${ctx.from.first_name}! Выбери действие:`,
     Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
