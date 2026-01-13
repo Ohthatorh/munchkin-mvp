@@ -105,23 +105,13 @@ export async function leaveRoom(roomCode: string, playerId: string) {
 }
 
 export function formatRoomStats(players: Record<string, Player>): string {
-  const arr = Object.values(players);
-
-  if (!arr.length) return "Комната пуста ❌";
-
-  let result = `🏟 Статистика комнаты 🏟\n\n`;
-  result += `👤 Ник/Пол   ⬆️ LVL   ⚔️ DMG   🎯 TOTAL\n`;
-  result += `-----------------------------------\n`;
-
-  for (const p of arr) {
-    const nickname = p.nickname.padEnd(12, " "); // подбираем ширину
-    const sex = p.sex === "мужчина" ? "🧑" : "👩";
-    const level = String(p.level).padStart(2, " ");
-    const dmg = String(p.damage).padStart(3, " ");
-    const total = String(p.level + p.damage).padStart(3, " ");
-
-    result += `${nickname}${sex}   ${level}     ${dmg}     ${total}\n`;
-  }
-
-  return "```\n" + result + "\n```"; // код-блок для Telegram
+  const arr = Object.values(players)
+    .map(
+      (p) =>
+        `Манчкин: ${p.nickname}-${p.sex}.  Уровень: ${
+          p.level
+        }. Урон от шмоток: ${p.damage}. Общий урон: ${p.level + p.damage}`
+    )
+    .join("\n");
+  return arr || "Комната пуста";
 }
