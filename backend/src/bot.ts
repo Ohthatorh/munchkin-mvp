@@ -114,16 +114,7 @@ bot.command("start", (ctx) => {
   ctx.session = {};
   ctx.reply(
     `Привет, ${ctx.from.first_name}! Выбери действие:`,
-    Markup.inlineKeyboard([
-      getButton(["JOIN_ROOM"]),
-      getButton(["LEAVE_ROOM"]),
-      getButton(["SET_NICK"]),
-      getButton(["SET_SEX"]),
-      getButton(["SET_LEVEL"]),
-      getButton(["SET_DMG"]),
-      getButton(["MY_STATS"]),
-      getButton(["ROOM_STATS"]),
-    ])
+    Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
   );
 });
 
@@ -143,14 +134,7 @@ bot.action("LEAVE_ROOM", async (ctx) => {
 
   ctx.reply(
     `Ты вышел из комнаты ${room} 🚪`,
-    Markup.inlineKeyboard([
-      getButton(["SET_LEVEL"]),
-      getButton(["SET_DMG"]),
-      getButton(["SET_SEX"]),
-      getButton(["ROOM_STATS"]),
-      getButton(["MY_STATS"]),
-      getButton(["LEAVE_ROOM"]),
-    ])
+    Markup.inlineKeyboard([getButton(["JOIN_ROOM"])])
   );
   ctx.answerCbQuery();
 });
