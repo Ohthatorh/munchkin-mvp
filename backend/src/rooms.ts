@@ -108,15 +108,20 @@ export function formatRoomStats(players: Record<string, Player>): string {
   const arr = Object.values(players);
 
   if (arr.length === 0) return "Комната пуста ❌";
-  let result = "🏟 Статистика комнаты 🏟\n\n";
-  for (const p of arr) {
-    const nickname = p.nickname.padEnd(10, " ");
-    const sex = p.sex === "мужчина" ? "🧑" : "👩";
-    const level = String(p.level).padStart(2, " ");
-    const dmg = String(p.damage).padStart(3, " ");
-    const total = String(p.level + p.damage).padStart(3, " ");
 
-    result += `Манчкин: \n ${nickname}${sex}\n Уровень: ${level}\n Урон от шмота: ${dmg}\n Общий урон:${total}\n`;
+  let result = "🏟 <b>Статистика комнаты</b> 🏟\n\n";
+
+  for (const p of arr) {
+    const sexEmoji = p.sex === "мужчина" ? "🧑" : "👩";
+    const levelEmoji = "⬆️";
+    const dmgEmoji = "⚔️";
+    const totalEmoji = "🎯";
+
+    result += `🛡️ <b>${p.nickname}</b> ${sexEmoji}\n`;
+    result += `  ${levelEmoji} Уровень: <b>${p.level}</b>\n`;
+    result += `  ${dmgEmoji} Урон от шмота: <b>${p.damage}</b>\n`;
+    result += `  ${totalEmoji} Общий урон: <b>${p.level + p.damage}</b>\n`;
+    result += `────────────────────\n`; // разделитель между игроками
   }
 
   return result;
