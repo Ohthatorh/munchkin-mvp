@@ -415,12 +415,26 @@ bot.on(message("text"), async (ctx) => {
       if (roomKeys.includes(roomCode))
         return ctx.reply(
           `Ты уже в комнате ${roomCode} 🚪`,
-          Markup.inlineKeyboard([getButton(["LEAVE_ROOM"])])
+          Markup.inlineKeyboard([
+            getButton(["SET_LEVEL"]),
+            getButton(["SET_DMG"]),
+            getButton(["SET_SEX"]),
+            getButton(["ROOM_STATS"]),
+            getButton(["MY_STATS"]),
+            getButton(["LEAVE_ROOM"]),
+          ])
         );
       if (roomKeys.length > 0 && roomKeys[0] !== roomCode)
         return ctx.reply(
-          `Ты уже в комнате ${roomKeys[0]}, выйди из нее ❌`,
-          Markup.inlineKeyboard([getButton(["LEAVE_ROOM"])])
+          `Ты уже в комнате ${roomCode} 🚪`,
+          Markup.inlineKeyboard([
+            getButton(["SET_LEVEL"]),
+            getButton(["SET_DMG"]),
+            getButton(["SET_SEX"]),
+            getButton(["ROOM_STATS"]),
+            getButton(["MY_STATS"]),
+            getButton(["LEAVE_ROOM"]),
+          ])
         );
 
       const player: Player = {
