@@ -1,4 +1,4 @@
-import { Telegraf, Markup, session } from "telegraf";
+import { Telegraf, Markup, session, Context } from "telegraf";
 import { message } from "telegraf/filters";
 import {
   addPlayer,
@@ -106,7 +106,7 @@ bot.action(/LEVEL_(\d+)/, async (ctx) => {
   const room = rooms[0];
   await updatePlayer(room, ctx.from.id.toString(), { level: lvl });
 
-  await ctx.editMessageReplyMarkup(null);
+  await ctx.editMessageReplyMarkup(null!);
   ctx.reply(`Твой уровень теперь ⬆️ ${lvl}`);
   ctx.answerCbQuery();
 });
@@ -124,7 +124,7 @@ bot.action("SET_DMG", async (ctx) => {
 });
 
 // ===== Генератор клавы DMG =====
-function sendDmgKeyboard(ctx) {
+function sendDmgKeyboard(ctx: Context) {
   const range = ctx.session.dmgRange ?? 0;
   const start = range * 10 + 1;
   const end = Math.min(start + 9, 100);
@@ -148,7 +148,7 @@ function sendDmgKeyboard(ctx) {
 bot.action("DMG_LEFT", async (ctx) => {
   ctx.session.dmgRange = Math.max(0, (ctx.session.dmgRange ?? 0) - 1);
 
-  await ctx.editMessageReplyMarkup(null);
+  await ctx.editMessageReplyMarkup(null!);
   sendDmgKeyboard(ctx);
   ctx.answerCbQuery();
 });
@@ -156,7 +156,7 @@ bot.action("DMG_LEFT", async (ctx) => {
 bot.action("DMG_RIGHT", async (ctx) => {
   ctx.session.dmgRange = Math.min(9, (ctx.session.dmgRange ?? 0) + 1); // 100 max → 0-9
 
-  await ctx.editMessageReplyMarkup(null);
+  await ctx.editMessageReplyMarkup(null!);
   sendDmgKeyboard(ctx);
   ctx.answerCbQuery();
 });
@@ -170,7 +170,7 @@ bot.action(/DMG_(\d+)/, async (ctx) => {
   const room = rooms[0];
   await updatePlayer(room, ctx.from.id.toString(), { damage: dmg });
 
-  await ctx.editMessageReplyMarkup(null);
+  await ctx.editMessageReplyMarkup(null!);
   ctx.reply(`Твой урон теперь ⚔️ ${dmg}`);
   ctx.answerCbQuery();
 });
@@ -196,7 +196,7 @@ bot.action("SEX_M", async (ctx) => {
   const room = rooms[0];
   await updatePlayer(room, ctx.from.id.toString(), { sex: "мужчина" });
 
-  await ctx.editMessageReplyMarkup(null);
+  await ctx.editMessageReplyMarkup(null!);
   ctx.reply("Пол установлен: 🧑 Мужчина");
   ctx.answerCbQuery();
 });
@@ -208,7 +208,7 @@ bot.action("SEX_F", async (ctx) => {
   const room = rooms[0];
   await updatePlayer(room, ctx.from.id.toString(), { sex: "женщина" });
 
-  await ctx.editMessageReplyMarkup(null);
+  await ctx.editMessageReplyMarkup(null!);
   ctx.reply("Пол установлен: 👩 Женщина");
   ctx.answerCbQuery();
 });
