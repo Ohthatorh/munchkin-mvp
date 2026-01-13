@@ -117,7 +117,7 @@ export function formatRoomStats(players: Record<string, Player>): string {
     const dmgEmoji = "⚔️";
     const totalEmoji = "🎯";
 
-    result += `🛡️${p.nickname} ${sexEmoji}\n`;
+    result += `🛡️${p.nickname} ${sexEmoji}\n\n`;
     result += `${levelEmoji} Уровень: ${p.level}\n`;
     result += `${dmgEmoji} Урон от шмота: ${p.damage}\n`;
     result += `${totalEmoji} Общий урон: ${p.level + p.damage}\n`;
