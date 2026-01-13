@@ -115,16 +115,14 @@ bot.command("start", (ctx) => {
   ctx.reply(
     `Привет, ${ctx.from.first_name}! Выбери действие:`,
     Markup.inlineKeyboard([
-      sortButtons([
-        "JOIN_ROOM",
-        "LEAVE_ROOM",
-        "SET_NICK",
-        "SET_SEX",
-        "SET_LEVEL",
-        "SET_DMG",
-        "MY_STATS",
-        "ROOM_STATS",
-      ]),
+      sortButtons(["JOIN_ROOM"]),
+      sortButtons(["LEAVE_ROOM"]),
+      sortButtons(["SET_NICK"]),
+      sortButtons(["SET_SEX"]),
+      sortButtons(["SET_LEVEL"]),
+      sortButtons(["SET_DMG"]),
+      sortButtons(["MY_STATS"]),
+      sortButtons(["ROOM_STATS"]),
     ])
   );
 });
