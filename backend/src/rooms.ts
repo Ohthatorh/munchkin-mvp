@@ -109,7 +109,7 @@ export function formatRoomStats(players: Record<string, Player>): string {
 
   if (arr.length === 0) return "Комната пуста ❌";
 
-  let result = "🏟 <b>Статистика комнаты</b> 🏟\n\n";
+  let result = "🏟 Статистика комнаты🏟\n\n";
 
   for (const p of arr) {
     const sexEmoji = p.sex === "мужчина" ? "🧑" : "👩";
@@ -117,10 +117,10 @@ export function formatRoomStats(players: Record<string, Player>): string {
     const dmgEmoji = "⚔️";
     const totalEmoji = "🎯";
 
-    result += `🛡️ <b>${p.nickname}</b> ${sexEmoji}\n`;
-    result += `  ${levelEmoji} Уровень: <b>${p.level}</b>\n`;
-    result += `  ${dmgEmoji} Урон от шмота: <b>${p.damage}</b>\n`;
-    result += `  ${totalEmoji} Общий урон: <b>${p.level + p.damage}</b>\n`;
+    result += `🛡️${p.nickname} ${sexEmoji}\n`;
+    result += `${levelEmoji} Уровень: ${p.level}\n`;
+    result += `${dmgEmoji} Урон от шмота: ${p.damage}\n`;
+    result += `${totalEmoji} Общий урон: ${p.level + p.damage}\n`;
     result += `────────────────────\n`; // разделитель между игроками
   }
 

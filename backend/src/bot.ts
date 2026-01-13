@@ -331,18 +331,17 @@ bot.action("ROOM_STATS", async (ctx) => {
   const room = rooms[0];
   const players = await getPlayers(room);
 
-  ctx.reply(`🏟 Комната ${room}:\n\n${formatRoomStats(players)}`, {
-    parse_mode: "Markdown",
-    ...Markup.inlineKeyboard([
+  ctx.reply(
+    `🏟 Комната ${room}:\n\n${formatRoomStats(players)}`,
+    Markup.inlineKeyboard([
       getButton(["SET_LEVEL"]),
       getButton(["SET_DMG"]),
       getButton(["SET_SEX"]),
       getButton(["ROOM_STATS"]),
       getButton(["MY_STATS"]),
       getButton(["LEAVE_ROOM"]),
-    ]),
-  });
-
+    ])
+  );
   ctx.answerCbQuery();
 });
 
