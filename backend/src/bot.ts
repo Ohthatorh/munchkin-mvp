@@ -413,7 +413,10 @@ bot.on(message("text"), async (ctx) => {
         );
       const roomKeys = await getRoomsForPlayer(playerId);
       if (roomKeys.includes(roomCode))
-        return ctx.reply(`Ты уже в комнате ${roomCode} 🚪`);
+        return ctx.reply(
+          `Ты уже в комнате ${roomCode} 🚪`,
+          Markup.inlineKeyboard([getButton(["LEAVE_ROOM"])])
+        );
       if (roomKeys.length > 0 && roomKeys[0] !== roomCode)
         return ctx.reply(
           `Ты уже в комнате ${roomKeys[0]}, выйди из нее ❌`,
