@@ -105,13 +105,19 @@ export async function leaveRoom(roomCode: string, playerId: string) {
 }
 
 export function formatRoomStats(players: Record<string, Player>): string {
-  const arr = Object.values(players)
-    .map(
-      (p) =>
-        `Манчкин: ${p.nickname}-${p.sex}.  Уровень: ${
-          p.level
-        }. Урон от шмоток: ${p.damage}. Общий урон: ${p.level + p.damage}`
-    )
-    .join("\n");
-  return arr || "Комната пуста";
+  const arr = Object.values(players);
+
+  if (arr.length === 0) return "Комната пуста ❌";
+  let result = "🏟 Статистика комнаты 🏟\n\n";
+  for (const p of arr) {
+    const nickname = p.nickname.padEnd(10, " ");
+    const sex = p.sex === "мужчина" ? "🧑" : "👩";
+    const level = String(p.level).padStart(2, " ");
+    const dmg = String(p.damage).padStart(3, " ");
+    const total = String(p.level + p.damage).padStart(3, " ");
+
+    result += `Манчкин: \n ${nickname}${sex}\n Уровень: ${level}\n Урон от шмота: ${dmg}\n Общий урон:${total}\n`;
+  }
+
+  return result;
 }
