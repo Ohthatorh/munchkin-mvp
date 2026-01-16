@@ -54,6 +54,10 @@ const buttons = [
     code: "GET_CUBE",
     callback: Markup.button.callback("🎲 Бросить кубик (1-6)", "GET_CUBE"),
   },
+  {
+    code: "DIE",
+    callback: Markup.button.callback("☠️ Погиб", "DIE"),
+  },
 ];
 
 function getButton(codes: string[]) {
@@ -190,6 +194,7 @@ bot.action("GET_CUBE", async (ctx) => {
       getButton(["SET_SEX"]),
       getButton(["ROOM_STATS"]),
       getButton(["MY_STATS"]),
+      getButton(["DIE"]),
       getButton(["LEAVE_ROOM"]),
     ]),
   );
@@ -226,6 +231,38 @@ bot.action("SET_NICK", async (ctx) => {
   await ctx.deleteMessage();
   ctx.session.waitingFor = "NICK";
   ctx.reply("Напиши свой ник 📝:");
+  ctx.answerCbQuery();
+});
+
+bot.action("DIE", async (ctx) => {
+  const playerId = ctx.from.id.toString();
+  const rooms = await getRoomsForPlayer(playerId);
+  await ctx.deleteMessage();
+
+  if (!rooms.length) {
+    return ctx.reply(
+      "Ты не в комнате ❌",
+      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+    );
+  }
+
+  const room = rooms[0];
+  await updatePlayer(room, playerId, {
+    damage: 0,
+  });
+
+  ctx.reply(
+    "☠️ Ты погиб! Весь шмот потерян. Урон теперь 0.",
+    Markup.inlineKeyboard([
+      getButton(["GET_CUBE"]),
+      getButton(["SET_LEVEL"]),
+      getButton(["SET_DMG"]),
+      getButton(["SET_SEX"]),
+      getButton(["ROOM_STATS"]),
+      getButton(["MY_STATS"]),
+      getButton(["LEAVE_ROOM"]),
+    ]),
+  );
   ctx.answerCbQuery();
 });
 
@@ -274,6 +311,7 @@ bot.action(/LEVEL_(\d+)/, async (ctx) => {
       getButton(["SET_SEX"]),
       getButton(["ROOM_STATS"]),
       getButton(["MY_STATS"]),
+      getButton(["DIE"]),
       getButton(["LEAVE_ROOM"]),
     ]),
   );
@@ -334,6 +372,8 @@ bot.action(/DMG_SET_(\d+)/, async (ctx) => {
       getButton(["SET_SEX"]),
       getButton(["ROOM_STATS"]),
       getButton(["MY_STATS"]),
+      getButton(["DIE"]),
+
       getButton(["LEAVE_ROOM"]),
     ]),
   );
@@ -371,6 +411,8 @@ bot.action("MY_STATS", async (ctx) => {
       getButton(["SET_SEX"]),
       getButton(["ROOM_STATS"]),
       getButton(["MY_STATS"]),
+      getButton(["DIE"]),
+
       getButton(["LEAVE_ROOM"]),
     ]),
   );
@@ -397,6 +439,8 @@ bot.action("ROOM_STATS", async (ctx) => {
       getButton(["SET_SEX"]),
       getButton(["ROOM_STATS"]),
       getButton(["MY_STATS"]),
+      getButton(["DIE"]),
+
       getButton(["LEAVE_ROOM"]),
     ]),
   );
@@ -437,6 +481,8 @@ bot.action("SEX_M", async (ctx) => {
       getButton(["SET_SEX"]),
       getButton(["ROOM_STATS"]),
       getButton(["MY_STATS"]),
+      getButton(["DIE"]),
+
       getButton(["LEAVE_ROOM"]),
     ]),
   );
@@ -463,13 +509,13 @@ bot.action("SEX_F", async (ctx) => {
       getButton(["SET_SEX"]),
       getButton(["ROOM_STATS"]),
       getButton(["MY_STATS"]),
+      getButton(["DIE"]),
+
       getButton(["LEAVE_ROOM"]),
     ]),
   );
   ctx.answerCbQuery();
 });
-
-// ===== Text handler =====
 
 // ===== Text handler =====
 bot.on(message("text"), async (ctx) => {
@@ -500,6 +546,8 @@ bot.on(message("text"), async (ctx) => {
               getButton(["SET_SEX"]),
               getButton(["ROOM_STATS"]),
               getButton(["MY_STATS"]),
+              getButton(["DIE"]),
+
               getButton(["LEAVE_ROOM"]),
             ]),
           );
@@ -546,6 +594,8 @@ bot.on(message("text"), async (ctx) => {
             getButton(["SET_SEX"]),
             getButton(["ROOM_STATS"]),
             getButton(["MY_STATS"]),
+            getButton(["DIE"]),
+
             getButton(["LEAVE_ROOM"]),
           ]),
         );
@@ -563,6 +613,8 @@ bot.on(message("text"), async (ctx) => {
       getButton(["SET_SEX"]),
       getButton(["ROOM_STATS"]),
       getButton(["MY_STATS"]),
+      getButton(["DIE"]),
+
       getButton(["LEAVE_ROOM"]),
     ]),
   );
