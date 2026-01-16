@@ -58,10 +58,15 @@ export async function broadcastCubeUpdate(
   playerId: string,
   cube: string,
 ) {
-  const playersObj = await getPlayers(roomCode);
-  const player = playersObj[playerId];
-  const msg = JSON.stringify({ type: "GET_CUBE", data: player, cube: cube });
-  rooms[roomCode].forEach((client) => client.send(msg));
+  try {
+    const playersObj = await getPlayers(roomCode);
+    const player = playersObj[playerId];
+    const msg = JSON.stringify({ type: "GET_CUBE", data: player, cube: cube });
+    // rooms[roomCode].forEach((client) => client.send(msg));
+    console.log(rooms);
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 console.log("WebSocket server running on ws://localhost:3001");
