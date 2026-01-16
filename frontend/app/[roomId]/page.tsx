@@ -21,12 +21,12 @@ export default function Room() {
   useEffect(() => {
     if (!roomId) return;
 
-    const socket = new WebSocket("ws://195.161.114.116:3001");
+    const socket = new WebSocket("ws://munchhelper.com:3001");
     wsRef.current = socket; // сохраняем в ref, не в state
 
     socket.onopen = () => {
       socket.send(
-        JSON.stringify({ type: "JOIN_ROOM", data: { roomCode: roomId } })
+        JSON.stringify({ type: "JOIN_ROOM", data: { roomCode: roomId } }),
       );
     };
 
