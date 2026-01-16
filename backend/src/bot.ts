@@ -557,6 +557,20 @@ bot.on(message("text"), async (ctx) => {
         ]),
       );
       break;
+    default:
+      await ctx.deleteMessage();
+      return ctx.reply(
+        `Такой команды нет ты чо даун`,
+        Markup.inlineKeyboard([
+          getButton(["GET_CUBE"]),
+          getButton(["SET_LEVEL"]),
+          getButton(["SET_DMG"]),
+          getButton(["SET_SEX"]),
+          getButton(["ROOM_STATS"]),
+          getButton(["MY_STATS"]),
+          getButton(["LEAVE_ROOM"]),
+        ]),
+      );
   }
 
   ctx.session.waitingFor = undefined;
