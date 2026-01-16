@@ -193,7 +193,7 @@ bot.action("GET_CUBE", async (ctx) => {
       getButton(["LEAVE_ROOM"]),
     ]),
   );
-  await updateCube(room, playerId, emoji);
+  await updateCube(room, playerId, roll.toString());
   ctx.answerCbQuery();
 });
 

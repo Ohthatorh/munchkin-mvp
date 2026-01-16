@@ -16,6 +16,7 @@ export default function Room() {
   const params = useParams();
   const roomId = params.roomId;
   const [players, setPlayers] = useState<Player[]>([]);
+  const [cube, setCube] = useState<(Player & { cube: string }) | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function Room() {
     socket.onmessage = (event: MessageEvent) => {
       const msg = JSON.parse(event.data);
       if (msg.type === "ROOM_STATE") setPlayers(msg.data);
+      if (msg.type === "GET_CUBE") setCube(msg.data);
     };
 
     return () => {
@@ -68,6 +70,11 @@ export default function Room() {
           ))}
         </tbody>
       </table>
+      {cube?.cube && (
+        <p>
+          Игрок {cube?.nickname} сделал бросок кубика, результат: {cube?.cube}
+        </p>
+      )}
     </div>
   );
 }
