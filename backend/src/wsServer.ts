@@ -58,13 +58,12 @@ export async function broadcastCubeUpdate(
   playerId: string,
   cube: string,
 ) {
+  if (!rooms[roomCode]) return;
   try {
     const playersObj = await getPlayers(roomCode);
     const player = playersObj[playerId];
     const msg = JSON.stringify({ type: "GET_CUBE", data: player, cube: cube });
-    console.log(roomCode);
-    // rooms[roomCode].forEach((client) => client.send(msg));
-    console.log(rooms);
+    rooms[roomCode].forEach((client) => client.send(msg));
   } catch (error) {
     console.error(error);
   }
