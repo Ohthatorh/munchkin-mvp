@@ -471,28 +471,74 @@ bot.action("SEX_F", async (ctx) => {
 
 // ===== Text handler =====
 
+// ===== Text handler =====
 bot.on(message("text"), async (ctx) => {
   const input = ctx.message.text;
-  const waitingFor = ctx.session.waitingFor;
-  if (!waitingFor) return;
-
+  const waitingFor = ctx.session?.waitingFor;
   const playerId = ctx.from.id.toString();
   const rooms = await getRoomsForPlayer(playerId);
+  const inRoom = rooms.length > 0;
   const room = rooms[0];
 
-  switch (waitingFor) {
-    case "ROOM_CODE":
-      const roomCode = input.toUpperCase();
-      if (!(await roomExists(roomCode)))
-        return ctx.reply(
-          `Комнаты ${roomCode} не существует ❌`,
-          Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+  // Если бот ожидает ввод (ник или код комнаты)
+  if (waitingFor) {
+    switch (waitingFor) {
+      case "ROOM_CODE":
+        const roomCode = input.toUpperCase();
+        if (!(await roomExists(roomCode)))
+          return ctx.reply(
+            `Комнаты ${roomCode} не существует ❌`,
+            Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+          );
+        if (rooms.includes(roomCode))
+          return ctx.reply(
+            `Ты уже в комнате ${roomCode} 🚪`,
+            Markup.inlineKeyboard([
+              getButton(["GET_CUBE"]),
+              getButton(["SET_LEVEL"]),
+              getButton(["SET_DMG"]),
+              getButton(["SET_SEX"]),
+              getButton(["ROOM_STATS"]),
+              getButton(["MY_STATS"]),
+              getButton(["LEAVE_ROOM"]),
+            ]),
+          );
+        if (rooms.length > 0 && rooms[0] !== roomCode)
+          return ctx.reply(
+            `Ты уже в другой комнате (${rooms[0]}). Сначала выйди из неё.`,
+            Markup.inlineKeyboard([getButton(["LEAVE_ROOM"])]),
+          );
+
+        const player: Player = {
+          id: playerId,
+          nickname: "",
+          level: 1,
+          damage: 0,
+          sex: "мужчина",
+        };
+
+        await addPlayer(roomCode, player);
+        await ctx.deleteMessage();
+        ctx.reply(
+          `Ты вошел в комнату ${roomCode} 🚪. Установи ник:`,
+          Markup.inlineKeyboard([
+            getButton(["SET_NICK"]),
+            getButton(["LEAVE_ROOM"]),
+          ]),
         );
-      const roomKeys = await getRoomsForPlayer(playerId);
-      await ctx.deleteMessage();
-      if (roomKeys.includes(roomCode))
-        return ctx.reply(
-          `Ты уже в комнате ${roomCode} 🚪`,
+        ctx.session.waitingFor = undefined;
+        return;
+
+      case "NICK":
+        if (!inRoom)
+          return ctx.reply(
+            "Ты не в комнате ❌",
+            Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+          );
+        await updatePlayer(room, playerId, { nickname: input });
+        await ctx.deleteMessage();
+        ctx.reply(
+          `Ник установлен: 📝 ${input}`,
           Markup.inlineKeyboard([
             getButton(["GET_CUBE"]),
             getButton(["SET_LEVEL"]),
@@ -503,77 +549,23 @@ bot.on(message("text"), async (ctx) => {
             getButton(["LEAVE_ROOM"]),
           ]),
         );
-      if (roomKeys.length > 0 && roomKeys[0] !== roomCode)
-        return ctx.reply(
-          `Ты уже в комнате ${roomCode} 🚪`,
-          Markup.inlineKeyboard([
-            getButton(["GET_CUBE"]),
-            getButton(["SET_LEVEL"]),
-            getButton(["SET_DMG"]),
-            getButton(["SET_SEX"]),
-            getButton(["ROOM_STATS"]),
-            getButton(["MY_STATS"]),
-            getButton(["LEAVE_ROOM"]),
-          ]),
-        );
-
-      const player: Player = {
-        id: playerId,
-        nickname: "",
-        level: 1,
-        damage: 0,
-        sex: "мужчина",
-      };
-
-      await addPlayer(roomCode, player);
-
-      ctx.reply(
-        `Ты вошел в комнату ${roomCode} 🚪. Установи ник:`,
-        Markup.inlineKeyboard([
-          getButton(["SET_NICK"]),
-          getButton(["LEAVE_ROOM"]),
-        ]),
-      );
-      break;
-
-    case "NICK":
-      if (!room)
-        return ctx.reply(
-          "Ты не в комнате ❌",
-          Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
-        );
-      await updatePlayer(room, playerId, { nickname: input });
-      await ctx.deleteMessage();
-      ctx.reply(
-        `Ник установлен: 📝 ${input}`,
-        Markup.inlineKeyboard([
-          getButton(["GET_CUBE"]),
-          getButton(["SET_LEVEL"]),
-          getButton(["SET_DMG"]),
-          getButton(["SET_SEX"]),
-          getButton(["ROOM_STATS"]),
-          getButton(["MY_STATS"]),
-          getButton(["LEAVE_ROOM"]),
-        ]),
-      );
-      break;
-    default:
-      await ctx.deleteMessage();
-      return ctx.reply(
-        `Такой команды нет ты чо даун`,
-        Markup.inlineKeyboard([
-          getButton(["GET_CUBE"]),
-          getButton(["SET_LEVEL"]),
-          getButton(["SET_DMG"]),
-          getButton(["SET_SEX"]),
-          getButton(["ROOM_STATS"]),
-          getButton(["MY_STATS"]),
-          getButton(["LEAVE_ROOM"]),
-        ]),
-      );
+        ctx.session.waitingFor = undefined;
+        return;
+    }
   }
 
-  ctx.session.waitingFor = undefined;
+  return ctx.reply(
+    `Команды нет ты чо даун спасибо 👀`,
+    Markup.inlineKeyboard([
+      getButton(["GET_CUBE"]),
+      getButton(["SET_LEVEL"]),
+      getButton(["SET_DMG"]),
+      getButton(["SET_SEX"]),
+      getButton(["ROOM_STATS"]),
+      getButton(["MY_STATS"]),
+      getButton(["LEAVE_ROOM"]),
+    ]),
+  );
 });
 
 // ===== Launch =====
