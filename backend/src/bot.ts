@@ -157,6 +157,7 @@ bot.command("start", async (ctx) => {
         getButton(["SET_SEX"]),
         getButton(["ROOM_STATS"]),
         getButton(["MY_STATS"]),
+        getButton(["DIE"]),
         getButton(["LEAVE_ROOM"]),
       ]),
     );
@@ -373,7 +374,6 @@ bot.action(/DMG_SET_(\d+)/, async (ctx) => {
       getButton(["ROOM_STATS"]),
       getButton(["MY_STATS"]),
       getButton(["DIE"]),
-
       getButton(["LEAVE_ROOM"]),
     ]),
   );
@@ -412,7 +412,6 @@ bot.action("MY_STATS", async (ctx) => {
       getButton(["ROOM_STATS"]),
       getButton(["MY_STATS"]),
       getButton(["DIE"]),
-
       getButton(["LEAVE_ROOM"]),
     ]),
   );
@@ -440,7 +439,6 @@ bot.action("ROOM_STATS", async (ctx) => {
       getButton(["ROOM_STATS"]),
       getButton(["MY_STATS"]),
       getButton(["DIE"]),
-
       getButton(["LEAVE_ROOM"]),
     ]),
   );
@@ -482,7 +480,6 @@ bot.action("SEX_M", async (ctx) => {
       getButton(["ROOM_STATS"]),
       getButton(["MY_STATS"]),
       getButton(["DIE"]),
-
       getButton(["LEAVE_ROOM"]),
     ]),
   );
@@ -510,7 +507,6 @@ bot.action("SEX_F", async (ctx) => {
       getButton(["ROOM_STATS"]),
       getButton(["MY_STATS"]),
       getButton(["DIE"]),
-
       getButton(["LEAVE_ROOM"]),
     ]),
   );
@@ -547,7 +543,6 @@ bot.on(message("text"), async (ctx) => {
               getButton(["ROOM_STATS"]),
               getButton(["MY_STATS"]),
               getButton(["DIE"]),
-
               getButton(["LEAVE_ROOM"]),
             ]),
           );
@@ -595,7 +590,6 @@ bot.on(message("text"), async (ctx) => {
             getButton(["ROOM_STATS"]),
             getButton(["MY_STATS"]),
             getButton(["DIE"]),
-
             getButton(["LEAVE_ROOM"]),
           ]),
         );
@@ -614,7 +608,6 @@ bot.on(message("text"), async (ctx) => {
       getButton(["ROOM_STATS"]),
       getButton(["MY_STATS"]),
       getButton(["DIE"]),
-
       getButton(["LEAVE_ROOM"]),
     ]),
   );
