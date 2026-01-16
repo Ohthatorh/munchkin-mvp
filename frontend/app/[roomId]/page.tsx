@@ -21,8 +21,8 @@ export default function Room() {
   useEffect(() => {
     if (!roomId) return;
 
-    const socket = new WebSocket("ws://munchhelper.com:3001");
-    wsRef.current = socket; // сохраняем в ref, не в state
+    const socket = new WebSocket(`wss://munchhelper.com/room/${roomId}`);
+    wsRef.current = socket;
 
     socket.onopen = () => {
       socket.send(
@@ -31,7 +31,7 @@ export default function Room() {
     };
 
     socket.onmessage = (event: MessageEvent) => {
-      const msg = JSON.parse(event.data.toString());
+      const msg = JSON.parse(event.data);
       if (msg.type === "ROOM_STATE") setPlayers(msg.data);
     };
 
