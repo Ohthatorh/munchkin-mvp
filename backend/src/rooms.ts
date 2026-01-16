@@ -1,5 +1,5 @@
 import { redis } from "./redisClient";
-import { broadcastRoomState } from "./wsServer";
+import { broadcastCubeUpdate, broadcastRoomState } from "./wsServer";
 
 export interface Player {
   id: string;
@@ -31,7 +31,7 @@ export async function roomExists(roomCode: string): Promise<boolean> {
   console.log(
     exists === 1
       ? `Комната ${roomCode} существует.`
-      : `Комнаты ${roomCode} не существует.`
+      : `Комнаты ${roomCode} не существует.`,
   );
   return exists === 1;
 }
@@ -53,7 +53,7 @@ export async function addPlayer(roomCode: string, player: Player) {
 }
 
 export async function getPlayers(
-  roomCode: string
+  roomCode: string,
 ): Promise<Record<string, Player>> {
   const key = `room:${roomCode}:players`;
   const raw = await redis.hgetall(key);
@@ -75,7 +75,7 @@ export async function getPlayer(roomCode: string, playerId: string) {
 export async function updatePlayer(
   roomCode: string,
   playerId: string,
-  updates: Partial<Player>
+  updates: Partial<Player>,
 ) {
   const key = `room:${roomCode}:players`;
   const p = await redis.hget(key, playerId);
@@ -86,6 +86,15 @@ export async function updatePlayer(
   await redis.expire(key, ROOM_TTL);
   await broadcastRoomState(roomCode);
   return newPlayer;
+}
+
+export async function updateCube(
+  roomCode: string,
+  playerId: string,
+  cube: string,
+) {
+  await broadcastCubeUpdate(roomCode, playerId, cube);
+  return;
 }
 
 export async function getRoomsForPlayer(playerId: string): Promise<string[]> {

@@ -10,6 +10,7 @@ import {
   getPlayers,
   getPlayer,
   formatRoomStats,
+  updateCube,
 } from "./rooms";
 import "dotenv/config";
 
@@ -168,6 +169,8 @@ bot.command("start", async (ctx) => {
 
 bot.action("GET_CUBE", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
+  const room = rooms[0];
+  const playerId = ctx.from.id.toString();
   await ctx.deleteMessage();
   if (!rooms.length)
     return ctx.reply(
@@ -190,6 +193,7 @@ bot.action("GET_CUBE", async (ctx) => {
       getButton(["LEAVE_ROOM"]),
     ]),
   );
+  await updateCube(room, playerId, emoji);
   ctx.answerCbQuery();
 });
 

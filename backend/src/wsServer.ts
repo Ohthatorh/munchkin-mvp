@@ -53,4 +53,15 @@ export async function broadcastRoomState(roomCode: string) {
   rooms[roomCode].forEach((client) => client.send(msg));
 }
 
+export async function broadcastCubeUpdate(
+  roomCode: string,
+  playerId: string,
+  cube: string,
+) {
+  const playersObj = await getPlayers(roomCode);
+  const player = playersObj[playerId];
+  const msg = JSON.stringify({ type: "GET_CUBE", data: player, cube: cube });
+  rooms[roomCode].forEach((client) => client.send(msg));
+}
+
 console.log("WebSocket server running on ws://localhost:3001");
