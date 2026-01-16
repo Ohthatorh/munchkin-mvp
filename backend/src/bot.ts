@@ -49,6 +49,10 @@ const buttons = [
     code: "ROOM_STATS",
     callback: Markup.button.callback("🏟 Статистика комнаты", "ROOM_STATS"),
   },
+  {
+    code: "GET_CUBE",
+    callback: Markup.button.callback("🎲 Бросить кубик (1-6)", "GET_CUBE"),
+  },
 ];
 
 function getButton(codes: string[]) {
@@ -142,6 +146,7 @@ bot.command("start", async (ctx) => {
         `🎯 TOTAL: ${player.level + player.damage}\n` +
         `🧑‍🤝‍🧑 Пол: ${player.sex}`,
       Markup.inlineKeyboard([
+        getButton(["GET_CUBE"]),
         getButton(["SET_LEVEL"]),
         getButton(["SET_DMG"]),
         getButton(["SET_SEX"]),
@@ -160,6 +165,33 @@ bot.command("start", async (ctx) => {
 });
 
 // ===== Действия =====
+
+bot.action("GET_CUBE", async (ctx) => {
+  const rooms = await getRoomsForPlayer(ctx.from.id.toString());
+  await ctx.deleteMessage();
+  if (!rooms.length)
+    return ctx.reply(
+      "Ты не в комнате ❌",
+      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+    );
+
+  const roll = Math.floor(Math.random() * 6) + 1;
+  const emoji = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"][roll - 1];
+
+  ctx.reply(
+    `🎲 Ты бросил кубик!\nВыпало: ${roll} ${emoji}`,
+    Markup.inlineKeyboard([
+      getButton(["GET_CUBE"]),
+      getButton(["SET_LEVEL"]),
+      getButton(["SET_DMG"]),
+      getButton(["SET_SEX"]),
+      getButton(["ROOM_STATS"]),
+      getButton(["MY_STATS"]),
+      getButton(["LEAVE_ROOM"]),
+    ]),
+  );
+  ctx.answerCbQuery();
+});
 
 bot.action("JOIN_ROOM", async (ctx) => {
   await ctx.deleteMessage();
@@ -232,6 +264,7 @@ bot.action(/LEVEL_(\d+)/, async (ctx) => {
   ctx.reply(
     `Твой уровень теперь ⬆️ ${lvl}`,
     Markup.inlineKeyboard([
+      getButton(["GET_CUBE"]),
       getButton(["SET_LEVEL"]),
       getButton(["SET_DMG"]),
       getButton(["SET_SEX"]),
@@ -291,6 +324,7 @@ bot.action(/DMG_SET_(\d+)/, async (ctx) => {
   ctx.reply(
     `Твой урон теперь ⚔️ ${dmg}`,
     Markup.inlineKeyboard([
+      getButton(["GET_CUBE"]),
       getButton(["SET_LEVEL"]),
       getButton(["SET_DMG"]),
       getButton(["SET_SEX"]),
@@ -327,6 +361,7 @@ bot.action("MY_STATS", async (ctx) => {
       `🎯 TOTAL: ${player.level + player.damage}\n` +
       `🧑‍🤝‍🧑 Пол: ${player.sex}`,
     Markup.inlineKeyboard([
+      getButton(["GET_CUBE"]),
       getButton(["SET_LEVEL"]),
       getButton(["SET_DMG"]),
       getButton(["SET_SEX"]),
@@ -352,6 +387,7 @@ bot.action("ROOM_STATS", async (ctx) => {
   ctx.reply(
     `🏟 Комната ${room}:\n\n${formatRoomStats(players)}`,
     Markup.inlineKeyboard([
+      getButton(["GET_CUBE"]),
       getButton(["SET_LEVEL"]),
       getButton(["SET_DMG"]),
       getButton(["SET_SEX"]),
@@ -391,6 +427,7 @@ bot.action("SEX_M", async (ctx) => {
   ctx.reply(
     "Пол установлен: 🧑 Мужчина",
     Markup.inlineKeyboard([
+      getButton(["GET_CUBE"]),
       getButton(["SET_LEVEL"]),
       getButton(["SET_DMG"]),
       getButton(["SET_SEX"]),
@@ -416,6 +453,7 @@ bot.action("SEX_F", async (ctx) => {
   ctx.reply(
     "Пол установлен: 👩 Женщина",
     Markup.inlineKeyboard([
+      getButton(["GET_CUBE"]),
       getButton(["SET_LEVEL"]),
       getButton(["SET_DMG"]),
       getButton(["SET_SEX"]),
@@ -452,6 +490,7 @@ bot.on(message("text"), async (ctx) => {
         return ctx.reply(
           `Ты уже в комнате ${roomCode} 🚪`,
           Markup.inlineKeyboard([
+            getButton(["GET_CUBE"]),
             getButton(["SET_LEVEL"]),
             getButton(["SET_DMG"]),
             getButton(["SET_SEX"]),
@@ -464,6 +503,7 @@ bot.on(message("text"), async (ctx) => {
         return ctx.reply(
           `Ты уже в комнате ${roomCode} 🚪`,
           Markup.inlineKeyboard([
+            getButton(["GET_CUBE"]),
             getButton(["SET_LEVEL"]),
             getButton(["SET_DMG"]),
             getButton(["SET_SEX"]),
@@ -503,6 +543,7 @@ bot.on(message("text"), async (ctx) => {
       ctx.reply(
         `Ник установлен: 📝 ${input}`,
         Markup.inlineKeyboard([
+          getButton(["GET_CUBE"]),
           getButton(["SET_LEVEL"]),
           getButton(["SET_DMG"]),
           getButton(["SET_SEX"]),
