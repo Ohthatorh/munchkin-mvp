@@ -30,7 +30,7 @@ app.post("/backend-api/rooms", async (req, res) => {
 
 const server = http.createServer(app);
 
-const wss = new WebSocketServer({ server, path: "/ws" });
+const wss = new WebSocketServer({ server });
 
 const rooms: Record<string, Set<WebSocket>> = {};
 
