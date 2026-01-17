@@ -1,5 +1,4 @@
-import "./server";
-import "./services/wsServer";
+import "./services/server";
 import "./bot";
 
 console.log("Backend ready");
