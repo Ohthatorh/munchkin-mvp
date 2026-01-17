@@ -3,16 +3,16 @@ import { message } from "telegraf/filters";
 import {
   addPlayer,
   updatePlayer,
-  Player,
   roomExists,
   getRoomsForPlayer,
   leaveRoom,
   getPlayers,
   getPlayer,
-  formatRoomStats,
   updateCube,
-} from "./rooms";
+} from "./utils/rooms";
 import "dotenv/config";
+import { IPlayer, TSession } from "./utils/types";
+import { formatRoomStats } from "./utils/functions/formatRoomStats";
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "<YOUR_BOT_TOKEN>";
 const bot = new Telegraf(BOT_TOKEN);
@@ -69,13 +69,9 @@ function getButton(codes: string[]) {
 // ===== Сессии =====
 bot.use(session());
 
-type MySession = {
-  waitingFor?: "NICK" | "ROOM_CODE";
-  dmgPage?: number;
-};
 declare module "telegraf" {
   interface Context {
-    session: MySession;
+    session: TSession;
   }
 }
 
@@ -552,7 +548,7 @@ bot.on(message("text"), async (ctx) => {
             Markup.inlineKeyboard([getButton(["LEAVE_ROOM"])]),
           );
 
-        const player: Player = {
+        const player: IPlayer = {
           id: playerId,
           nickname: "",
           level: 1,

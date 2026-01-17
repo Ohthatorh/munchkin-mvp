@@ -1,5 +1,5 @@
 import { WebSocket, WebSocketServer } from "ws";
-import { createRoom, getPlayers, updatePlayer } from "./rooms";
+import { createRoom, getPlayers, updatePlayer } from "../utils/rooms";
 
 interface WSMessage {
   type: string;
@@ -20,11 +20,6 @@ wss.on("connection", (ws) => {
         case "JOIN_ROOM":
           currentRoom = data.roomCode;
           if (!currentRoom) return;
-          if (!rooms[currentRoom]) rooms[currentRoom] = new Set();
-          rooms[currentRoom].add(ws);
-
-          await createRoom(currentRoom);
-
           await broadcastRoomState(currentRoom);
           break;
 
