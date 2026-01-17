@@ -7,6 +7,7 @@ import {
 } from "../utils/rooms";
 import http from "http";
 import express from "express";
+import { genRoomId } from "../utils/functions/roomId";
 
 interface WSMessage {
   type: string;
@@ -14,9 +15,18 @@ interface WSMessage {
 }
 
 const app = express();
+
 app.use(express.json());
 
 app.get("/api/ping", (req, res) => res.send("pong"));
+
+app.post("/api/rooms", async (req, res) => {
+  let roomId = genRoomId();
+  while (roomExists(roomId)) roomId = genRoomId();
+
+  await createRoom(roomId);
+  res.json({ roomId });
+});
 
 const server = http.createServer(app);
 
