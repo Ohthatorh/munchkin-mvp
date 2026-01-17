@@ -13,11 +13,16 @@ import {
 import "dotenv/config";
 import { IPlayer, TSession } from "./utils/types";
 import { formatRoomStats } from "./utils/functions/formatRoomStats";
+import { genRoomId } from "./utils/functions/roomId";
 
 const BOT_TOKEN = process.env.BOT_TOKEN || "<YOUR_BOT_TOKEN>";
 const bot = new Telegraf(BOT_TOKEN);
 
 const buttons = [
+  {
+    code: "CREATE_ROOM",
+    callback: Markup.button.callback("🆕 Создать комнату", "CREATE_ROOM"),
+  },
   {
     code: "JOIN_ROOM",
     callback: Markup.button.callback("🚪 Войти в комнату", "JOIN_ROOM"),
@@ -66,7 +71,6 @@ function getButton(codes: string[]) {
     .map((btn) => btn.callback);
 }
 
-// ===== Сессии =====
 bot.use(session());
 
 declare module "telegraf" {
@@ -75,7 +79,6 @@ declare module "telegraf" {
   }
 }
 
-// ===== Helpers =====
 function dmgKeyboard(page: number) {
   const start = page * 10;
   const end = start + 9;
@@ -114,7 +117,6 @@ function dmgKeyboard(page: number) {
   return Markup.inlineKeyboard(rows);
 }
 
-// ===== Главное меню =====
 bot.command("start", async (ctx) => {
   const playerId = ctx.from.id.toString();
 
@@ -166,7 +168,40 @@ bot.command("start", async (ctx) => {
   }
 });
 
-// ===== Действия =====
+bot.action("CREATE_ROOM", async (ctx) => {
+  const playerId = ctx.from.id.toString();
+
+  try {
+    const roomCode = genRoomId();
+
+    if (!ctx.session) ctx.session = {};
+    ctx.session.dmgPage = 0;
+    ctx.session.waitingFor = undefined;
+
+    const player: IPlayer = {
+      id: playerId,
+      nickname: "",
+      level: 1,
+      damage: 0,
+      sex: "мужчина",
+    };
+
+    await addPlayer(roomCode, player);
+    await ctx.deleteMessage();
+    ctx.reply(
+      `Ты создал комнату ${roomCode} 🚪. Установи ник:`,
+      Markup.inlineKeyboard([
+        getButton(["SET_NICK"]),
+        getButton(["LEAVE_ROOM"]),
+      ]),
+    );
+    ctx.session.waitingFor = undefined;
+    return;
+  } catch (err) {
+    console.error(err);
+    ctx.reply("❌ Не удалось создать комнату. Попробуй снова.");
+  }
+});
 
 bot.action("GET_CUBE", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
@@ -263,10 +298,9 @@ bot.action("DIE", async (ctx) => {
   ctx.answerCbQuery();
 });
 
-// ===== LEVEL =====
-
 bot.action("SET_LEVEL", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
+  const room = rooms[0];
   await ctx.deleteMessage();
   if (!rooms.length)
     return ctx.reply(
@@ -282,7 +316,12 @@ bot.action("SET_LEVEL", async (ctx) => {
     }
     buttons.push(row);
   }
-  ctx.reply("Выбери уровень ⬆️:", Markup.inlineKeyboard(buttons));
+  const player = await getPlayer(room, ctx.from.id.toString());
+  const currentLevel = player!.level;
+  ctx.reply(
+    `Твой текущий уровень: ${currentLevel}\n Выбери уровень ⬆️:`,
+    Markup.inlineKeyboard(buttons),
+  );
   ctx.answerCbQuery();
 });
 
@@ -315,19 +354,22 @@ bot.action(/LEVEL_(\d+)/, async (ctx) => {
   ctx.answerCbQuery();
 });
 
-// ===== DAMAGE =====
-
 bot.action("SET_DMG", async (ctx) => {
   const rooms = await getRoomsForPlayer(ctx.from.id.toString());
+  const room = rooms[0];
   await ctx.deleteMessage();
   if (!rooms.length)
     return ctx.reply(
       "Ты не в комнате ❌",
       Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
     );
-
+  const player = await getPlayer(room, ctx.from.id.toString());
+  const currentDmg = player!.damage;
   ctx.session.dmgPage = 0;
-  ctx.reply("Выбери урон ⚔️:", dmgKeyboard(0));
+  ctx.reply(
+    `Твой текущий урон: ${currentDmg}\nВыбери урон ⚔️:`,
+    dmgKeyboard(0),
+  );
   ctx.answerCbQuery();
 });
 
@@ -509,7 +551,6 @@ bot.action("SEX_F", async (ctx) => {
   ctx.answerCbQuery();
 });
 
-// ===== Text handler =====
 bot.on(message("text"), async (ctx) => {
   const input = ctx.message.text;
   const waitingFor = ctx.session?.waitingFor;
@@ -518,7 +559,6 @@ bot.on(message("text"), async (ctx) => {
   const inRoom = rooms.length > 0;
   const room = rooms[0];
 
-  // Если бот ожидает ввод (ник или код комнаты)
   if (waitingFor) {
     switch (waitingFor) {
       case "ROOM_CODE":
@@ -608,8 +648,6 @@ bot.on(message("text"), async (ctx) => {
     ]),
   );
 });
-
-// ===== Launch =====
 
 bot.launch();
 console.log("Telegram bot started 🚀");
