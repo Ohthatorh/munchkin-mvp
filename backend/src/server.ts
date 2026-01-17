@@ -14,3 +14,9 @@ app.post("/api/rooms", async (req, res) => {
   await createRoom(roomId);
   res.json({ roomId });
 });
+
+const PORT = process.env.PORT || 4000;
+
+app.listen(PORT, () => {
+  console.log(`HTTP server running on port ${PORT}`);
+});

@@ -1,3 +1,4 @@
+import "./server";
 import "./services/wsServer";
 import "./bot";
 
