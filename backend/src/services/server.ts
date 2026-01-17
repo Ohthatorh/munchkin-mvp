@@ -18,9 +18,9 @@ const app = express();
 
 app.use(express.json());
 
-app.get("/api/ping", (req, res) => res.send("pong"));
+app.get("/backend-api/ping", (req, res) => res.send("pong"));
 
-app.post("/api/rooms", async (req, res) => {
+app.post("/backend-api/rooms", async (req, res) => {
   let roomId = genRoomId();
   while (roomExists(roomId)) roomId = genRoomId();
 
