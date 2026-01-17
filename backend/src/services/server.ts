@@ -1,5 +1,5 @@
 import { WebSocket, WebSocketServer } from "ws";
-import { getPlayers, roomExists } from "../utils/rooms";
+import { createRoom, getPlayers, roomExists } from "../utils/rooms";
 import http from "http";
 import express from "express";
 import { genRoomId } from "../utils/functions/roomId";
@@ -25,11 +25,13 @@ app.use(express.json());
 app.get("/ping", (req, res) => res.send("pong"));
 
 app.post("/rooms", async (req, res) => {
-  let roomId = genRoomId();
-  // while (roomExists(roomId)) roomId = genRoomId();
-  console.log(roomId);
-  // await createRoom(roomId);
-  res.json({ roomId });
+  try {
+    let roomId = genRoomId();
+    await createRoom(roomId);
+    res.json({ success: true, roomId });
+  } catch (error) {
+    res.json({ success: false, error });
+  }
 });
 
 const server = http.createServer(app);
