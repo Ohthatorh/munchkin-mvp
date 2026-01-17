@@ -3,6 +3,7 @@ import { getPlayers, roomExists } from "../utils/rooms";
 import http from "http";
 import express from "express";
 import { genRoomId } from "../utils/functions/roomId";
+import cors from "cors";
 
 interface WSMessage {
   type: string;
@@ -10,6 +11,14 @@ interface WSMessage {
 }
 
 const app = express();
+
+app.use(
+  cors({
+    origin: "http://localhost:3000", // адрес фронта на твоем ПК
+    methods: ["GET", "POST"],
+    credentials: true, // если фронт использует куки
+  }),
+);
 
 app.use(express.json());
 
