@@ -1,27 +1,28 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Home() {
   const router = useRouter();
+  const [isLoading, setLoading] = useState(false);
 
-  const createRoom = () => {
-    const code = generateRoomCode();
-    router.push(`/${code}`);
-  };
-
-  const generateRoomCode = () => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let code = "";
-    for (let i = 0; i < 6; i++)
-      code += chars[Math.floor(Math.random() * chars.length)];
-    return code;
+  const handleCreateRoom = async () => {
+    if (isLoading) return;
+    setLoading(true);
+    const res = await fetch("https://munchhelper.com/backend-api/rooms", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    const { roomId } = await res.json();
+    setLoading(false);
+    router.push(`/rooms/${roomId}/`);
   };
 
   return (
     <div style={{ display: "flex", justifyContent: "center", marginTop: 100 }}>
       <button
-        onClick={createRoom}
+        onClick={handleCreateRoom}
         style={{ padding: "10px 20px", fontSize: 20 }}
       >
         Создать комнату
