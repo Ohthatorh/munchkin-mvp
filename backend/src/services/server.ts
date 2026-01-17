@@ -1,10 +1,5 @@
 import { WebSocket, WebSocketServer } from "ws";
-import {
-  createRoom,
-  getPlayers,
-  roomExists,
-  updatePlayer,
-} from "../utils/rooms";
+import { getPlayers, roomExists } from "../utils/rooms";
 import http from "http";
 import express from "express";
 import { genRoomId } from "../utils/functions/roomId";
@@ -18,9 +13,9 @@ const app = express();
 
 app.use(express.json());
 
-app.get("/backend-api/ping", (req, res) => res.send("pong"));
+app.get("/ping", (req, res) => res.send("pong"));
 
-app.post("/backend-api/rooms", async (req, res) => {
+app.post("/rooms", async (req, res) => {
   let roomId = genRoomId();
   while (roomExists(roomId)) roomId = genRoomId();
   console.log(roomId);
