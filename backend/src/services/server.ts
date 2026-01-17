@@ -23,8 +23,8 @@ app.get("/backend-api/ping", (req, res) => res.send("pong"));
 app.post("/backend-api/rooms", async (req, res) => {
   let roomId = genRoomId();
   while (roomExists(roomId)) roomId = genRoomId();
-
-  await createRoom(roomId);
+  console.log(roomId);
+  // await createRoom(roomId);
   res.json({ roomId });
 });
 
