@@ -136,7 +136,11 @@ bot.command("start", async (ctx) => {
       // на всякий случай, если игрока нет в комнате
       ctx.reply(
         `Что-то пошло не так, ты в комнате ${room}, но тебя там нет.`,
-        Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+        Markup.inlineKeyboard([
+          getButton(["CREATE_ROOM"]),
+          getButton(["JOIN_ROOM"]),
+          getButton(["LEAVE_ROOM"]),
+        ]),
       );
       return;
     }
@@ -163,7 +167,10 @@ bot.command("start", async (ctx) => {
     // Игрок не в комнате — обычный старт
     ctx.reply(
       `Привет, ${ctx.from.first_name}! Выбери действие:`,
-      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+      Markup.inlineKeyboard([
+        getButton(["CREATE_ROOM"]),
+        getButton(["JOIN_ROOM"]),
+      ]),
     );
   }
 });
@@ -211,7 +218,10 @@ bot.action("GET_CUBE", async (ctx) => {
   if (!rooms.length)
     return ctx.reply(
       "Ты не в комнате ❌",
-      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+      Markup.inlineKeyboard([
+        getButton(["CREATE_ROOM"]),
+        getButton(["JOIN_ROOM"]),
+      ]),
     );
 
   const roll = Math.floor(Math.random() * 6) + 1;
@@ -247,14 +257,20 @@ bot.action("LEAVE_ROOM", async (ctx) => {
   if (!rooms.length)
     return ctx.reply(
       "Ты не в комнате ❌",
-      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+      Markup.inlineKeyboard([
+        getButton(["CREATE_ROOM"]),
+        getButton(["JOIN_ROOM"]),
+      ]),
     );
   const room = rooms[0];
   await leaveRoom(room, ctx.from.id.toString());
 
   ctx.reply(
     `Ты вышел из комнаты ${room} 🚪`,
-    Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+    Markup.inlineKeyboard([
+      getButton(["CREATE_ROOM"]),
+      getButton(["JOIN_ROOM"]),
+    ]),
   );
   ctx.answerCbQuery();
 });
@@ -274,7 +290,10 @@ bot.action("DIE", async (ctx) => {
   if (!rooms.length) {
     return ctx.reply(
       "Ты не в комнате ❌",
-      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+      Markup.inlineKeyboard([
+        getButton(["CREATE_ROOM"]),
+        getButton(["JOIN_ROOM"]),
+      ]),
     );
   }
 
@@ -305,7 +324,10 @@ bot.action("SET_LEVEL", async (ctx) => {
   if (!rooms.length)
     return ctx.reply(
       "Ты не в комнате ❌",
-      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+      Markup.inlineKeyboard([
+        getButton(["CREATE_ROOM"]),
+        getButton(["JOIN_ROOM"]),
+      ]),
     );
 
   const buttons: any[][] = [];
@@ -332,7 +354,10 @@ bot.action(/LEVEL_(\d+)/, async (ctx) => {
   if (!rooms.length)
     return ctx.reply(
       "Ты не в комнате ❌",
-      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+      Markup.inlineKeyboard([
+        getButton(["CREATE_ROOM"]),
+        getButton(["JOIN_ROOM"]),
+      ]),
     );
 
   const room = rooms[0];
@@ -361,7 +386,10 @@ bot.action("SET_DMG", async (ctx) => {
   if (!rooms.length)
     return ctx.reply(
       "Ты не в комнате ❌",
-      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+      Markup.inlineKeyboard([
+        getButton(["CREATE_ROOM"]),
+        getButton(["JOIN_ROOM"]),
+      ]),
     );
   const player = await getPlayer(room, ctx.from.id.toString());
   const currentDmg = player!.damage;
@@ -396,7 +424,10 @@ bot.action(/DMG_SET_(\d+)/, async (ctx) => {
   if (!rooms.length)
     return ctx.reply(
       "Ты не в комнате ❌",
-      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+      Markup.inlineKeyboard([
+        getButton(["CREATE_ROOM"]),
+        getButton(["JOIN_ROOM"]),
+      ]),
     );
 
   const room = rooms[0];
@@ -424,14 +455,20 @@ bot.action("MY_STATS", async (ctx) => {
   if (!rooms.length)
     return ctx.reply(
       "Ты не в комнате ❌",
-      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+      Markup.inlineKeyboard([
+        getButton(["CREATE_ROOM"]),
+        getButton(["JOIN_ROOM"]),
+      ]),
     );
   const room = rooms[0];
   const player = await getPlayer(room, ctx.from.id.toString());
   if (!player)
     return ctx.reply(
       "Ты не в комнате ❌",
-      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+      Markup.inlineKeyboard([
+        getButton(["CREATE_ROOM"]),
+        getButton(["JOIN_ROOM"]),
+      ]),
     );
   if (!player.nickname) return ctx.reply("Сначала установи ник 📝");
 
@@ -462,7 +499,10 @@ bot.action("ROOM_STATS", async (ctx) => {
   if (!rooms.length)
     return ctx.reply(
       "Ты не в комнате ❌",
-      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+      Markup.inlineKeyboard([
+        getButton(["CREATE_ROOM"]),
+        getButton(["JOIN_ROOM"]),
+      ]),
     );
   const room = rooms[0];
   const players = await getPlayers(room);
@@ -503,7 +543,10 @@ bot.action("SEX_M", async (ctx) => {
   if (!rooms.length)
     return ctx.reply(
       "Ты не в комнате ❌",
-      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+      Markup.inlineKeyboard([
+        getButton(["CREATE_ROOM"]),
+        getButton(["JOIN_ROOM"]),
+      ]),
     );
   const room = rooms[0];
   await updatePlayer(room, ctx.from.id.toString(), { sex: "мужчина" });
@@ -530,7 +573,10 @@ bot.action("SEX_F", async (ctx) => {
   if (!rooms.length)
     return ctx.reply(
       "Ты не в комнате ❌",
-      Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+      Markup.inlineKeyboard([
+        getButton(["CREATE_ROOM"]),
+        getButton(["JOIN_ROOM"]),
+      ]),
     );
   const room = rooms[0];
   await updatePlayer(room, ctx.from.id.toString(), { sex: "женщина" });
@@ -566,7 +612,10 @@ bot.on(message("text"), async (ctx) => {
         if (!(await roomExists(roomCode)))
           return ctx.reply(
             `Комнаты ${roomCode} не существует ❌`,
-            Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+            Markup.inlineKeyboard([
+              getButton(["CREATE_ROOM"]),
+              getButton(["JOIN_ROOM"]),
+            ]),
           );
         if (rooms.includes(roomCode))
           return ctx.reply(
@@ -612,7 +661,10 @@ bot.on(message("text"), async (ctx) => {
         if (!inRoom)
           return ctx.reply(
             "Ты не в комнате ❌",
-            Markup.inlineKeyboard([getButton(["JOIN_ROOM"])]),
+            Markup.inlineKeyboard([
+              getButton(["CREATE_ROOM"]),
+              getButton(["JOIN_ROOM"]),
+            ]),
           );
         await updatePlayer(room, playerId, { nickname: input });
         await ctx.deleteMessage();
