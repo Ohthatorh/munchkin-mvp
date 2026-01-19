@@ -2,7 +2,7 @@ import { redis } from "../services/redisClient";
 import { IPlayer } from "./types";
 import { broadcastCubeUpdate, broadcastRoomState } from "../services/server";
 
-const ROOM_TTL = 12 * 60 * 60; // 12 часов в секундах
+export const ROOM_TTL = 12 * 60 * 60; // 12 часов в секундах
 
 export async function createRoom(code: string) {
   const exists = await redis.exists(`room:${code}`);
