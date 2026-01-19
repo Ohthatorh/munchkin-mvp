@@ -10,6 +10,7 @@ import {
   getPlayer,
   updateCube,
   ROOM_TTL,
+  createRoom,
 } from "./utils/rooms";
 import "dotenv/config";
 import { IPlayer, TSession } from "./utils/types";
@@ -222,6 +223,7 @@ bot.action(
         sex: "мужчина",
       };
 
+      await createRoom(roomCode);
       await addPlayer(roomCode, player);
       await ctx.deleteMessage();
       ctx.reply(

@@ -4,7 +4,7 @@ import http from "http";
 import express from "express";
 import { genRoomId } from "../utils/functions/roomId";
 import cors from "cors";
-import { IRoomEvent } from "../utils/roomHistory";
+import { getRoomHistory, IRoomEvent } from "../utils/roomHistory";
 
 interface WSMessage {
   type: string;
@@ -68,7 +68,8 @@ wss.on("connection", (ws, req) => {
 
           if (!rooms[currentRoom!]) rooms[currentRoom!] = new Set();
           rooms[currentRoom!].add(ws);
-
+          const history: IRoomEvent[] = await getRoomHistory(currentRoom!);
+          ws.send(JSON.stringify({ type: "ROOM_HISTORY", data: history }));
           await broadcastRoomState(currentRoom!);
           break;
 
