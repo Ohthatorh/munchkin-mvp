@@ -122,9 +122,7 @@ export async function broadcastRoomEvent(room: string, event: IRoomEvent) {
   if (!rooms[room]) return;
 
   const msg = JSON.stringify({ type: "ROOM_EVENT", data: event });
-  rooms[room].forEach((client) => {
-    client.send(msg);
-  });
+  rooms[room].forEach((client) => client.send(msg));
 }
 
 const PORT = process.env.PORT || 4000;
