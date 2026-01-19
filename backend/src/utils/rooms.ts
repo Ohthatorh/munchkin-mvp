@@ -1,6 +1,10 @@
 import { redis } from "../services/redisClient";
 import { IPlayer } from "./types";
-import { broadcastCubeUpdate, broadcastRoomState } from "../services/server";
+import {
+  broadcastCubeUpdate,
+  broadcastRoomEvent,
+  broadcastRoomState,
+} from "../services/server";
 
 export const ROOM_TTL = 12 * 60 * 60; // 12 часов в секундах
 
@@ -28,6 +32,11 @@ export async function addPlayer(roomCode: string, player: IPlayer) {
   const key = `room:${roomCode}:players`;
   await redis.hset(key, player.id, JSON.stringify(player));
   await redis.expire(key, ROOM_TTL);
+  await broadcastRoomEvent(roomCode, {
+    timestamp: Date.now(),
+    playerId: player.id,
+    text: `Игрок ${player.nickname} вошел в комнату`,
+  });
 }
 
 export async function getPlayers(
@@ -63,6 +72,27 @@ export async function updatePlayer(
   await redis.hset(key, playerId, JSON.stringify(newPlayer));
   await redis.expire(key, ROOM_TTL);
   await broadcastRoomState(roomCode);
+  if (player.damage !== newPlayer.damage) {
+    await broadcastRoomEvent(roomCode, {
+      timestamp: Date.now(),
+      playerId,
+      text: `Игрок ${player.nickname} изменил свой урон на ${newPlayer.damage}`,
+    });
+  }
+  if (player.level !== newPlayer.level) {
+    await broadcastRoomEvent(roomCode, {
+      timestamp: Date.now(),
+      playerId,
+      text: `Игрок ${player.nickname} изменил свой уровень на ${newPlayer.level}`,
+    });
+  }
+  if (player.sex !== newPlayer.sex) {
+    await broadcastRoomEvent(roomCode, {
+      timestamp: Date.now(),
+      playerId,
+      text: `Игрок ${player.nickname} изменил свой пол на ${newPlayer.sex}`,
+    });
+  }
   return newPlayer;
 }
 
@@ -71,7 +101,14 @@ export async function updateCube(
   playerId: string,
   cube: string,
 ) {
+  const playersObj = await getPlayers(roomCode);
+  const player = playersObj[playerId];
   await broadcastCubeUpdate(roomCode, playerId, cube);
+  await broadcastRoomEvent(roomCode, {
+    timestamp: Date.now(),
+    playerId,
+    text: `Игрок ${player.nickname} бросил кубик на ${cube}`,
+  });
   return;
 }
 
@@ -86,7 +123,14 @@ export async function getRoomsForPlayer(playerId: string): Promise<string[]> {
 }
 
 export async function leaveRoom(roomCode: string, playerId: string) {
+  const playersObj = await getPlayers(roomCode);
+  const player = playersObj[playerId];
   const key = `room:${roomCode}:players`;
   await redis.hdel(key, playerId);
   await broadcastRoomState(roomCode);
+  await broadcastRoomEvent(roomCode, {
+    timestamp: Date.now(),
+    playerId,
+    text: `Игрок ${player.nickname} покинул комнату`,
+  });
 }
