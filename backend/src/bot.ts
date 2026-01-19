@@ -16,6 +16,8 @@ import { IPlayer, TSession } from "./utils/types";
 import { formatRoomStats } from "./utils/functions/formatRoomStats";
 import { genRoomId } from "./utils/functions/roomId";
 import { redis } from "./services/redisClient";
+import { addRoomEvent } from "./utils/roomHistory";
+import { broadcastRoomEvent } from "./services/server";
 
 declare module "telegraf" {
   interface Context {
@@ -271,6 +273,10 @@ bot.action(
       ]),
     );
     await updateCube(room, playerId, roll.toString());
+    const event = await addRoomEvent(room, playerId, `чо`);
+
+    // Шлём всем клиентам комнаты по WSS
+    broadcastRoomEvent(room, event);
     ctx.answerCbQuery();
   }),
 );

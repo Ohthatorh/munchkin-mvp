@@ -4,6 +4,7 @@ import http from "http";
 import express from "express";
 import { genRoomId } from "../utils/functions/roomId";
 import cors from "cors";
+import { IRoomEvent } from "../utils/roomHistory";
 
 interface WSMessage {
   type: string;
@@ -114,6 +115,15 @@ export async function broadcastCubeUpdate(
   } catch (error) {
     console.error(error);
   }
+}
+
+export async function broadcastRoomEvent(room: string, event: IRoomEvent) {
+  if (!rooms[room]) return;
+
+  const msg = JSON.stringify({ type: "ROOM_EVENT", data: event });
+  rooms[room].forEach((client) => {
+    client.send(msg);
+  });
 }
 
 const PORT = process.env.PORT || 4000;
