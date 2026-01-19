@@ -275,10 +275,6 @@ bot.action(
       ]),
     );
     await updateCube(room, playerId, roll.toString());
-    const event = await addRoomEvent(room, playerId, `чо`);
-
-    // Шлём всем клиентам комнаты по WSS
-    broadcastRoomEvent(room, event);
     ctx.answerCbQuery();
   }),
 );
