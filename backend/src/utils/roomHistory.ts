@@ -6,7 +6,7 @@ export interface IRoomEvent {
   text: string;
 }
 
-const HISTORY_LIMIT = 100;
+const HISTORY_LIMIT = 10;
 
 export async function addRoomEvent(
   room: string,
