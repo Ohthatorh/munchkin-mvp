@@ -16,7 +16,7 @@ export default function Home() {
     });
     const { roomId } = await res.json();
     setLoading(false);
-    router.push(`/rooms/${roomId}/`);
+    router.push(`/${roomId}/`);
   };
 
   return (
