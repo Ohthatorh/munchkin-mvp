@@ -738,10 +738,7 @@ bot.on(
             ]),
           );
           ctx.session.waitingFor = undefined;
-          if (ctx.session.lastPromptMsgId) {
-            await ctx.deleteMessage(ctx.session.lastPromptMsgId);
-            ctx.session.lastPromptMsgId = undefined;
-          }
+          await ctx.deleteMessage(ctx.chat.id, ctx.message.message_id - 1);
           return;
 
         case "NICK":
