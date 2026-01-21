@@ -1,8 +1,7 @@
 import http from "http";
 import express from "express";
 import cors from "cors";
-import { generateId } from "../functions/generateId";
-import { createRoom } from "../redis/helpers";
+import routes from "./routes";
 
 const PORT = process.env.PORT || 4000;
 
@@ -17,18 +16,7 @@ app.use(
 );
 
 app.use(express.json());
-
-app.get("/ping", (req, res) => res.send("pong"));
-
-app.post("/rooms", async (req, res) => {
-  try {
-    let roomId = generateId();
-    await createRoom(roomId);
-    res.json({ success: true, roomId });
-  } catch (error) {
-    res.json({ success: false, error });
-  }
-});
+app.use(routes);
 
 export const httpServer = http.createServer(app);
 
