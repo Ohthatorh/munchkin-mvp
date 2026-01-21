@@ -1,23 +1,23 @@
 import { Telegraf, Markup, session, Context } from "telegraf";
 import { message } from "telegraf/filters";
+import "dotenv/config";
+import { IPlayer, TSession } from "../types";
+import { redis } from "../redis/client";
 import {
   addPlayer,
-  updatePlayer,
-  roomExists,
+  createRoom,
+  getPlayer,
+  getPlayers,
   getRoomsForPlayer,
   leaveRoom,
-  getPlayers,
-  getPlayer,
-  updateCube,
   ROOM_TTL,
-  createRoom,
-} from "./utils/rooms";
-import "dotenv/config";
-import { IPlayer, TSession } from "./utils/types";
-import { formatRoomStats } from "./utils/functions/formatRoomStats";
-import { genRoomId } from "./utils/functions/roomId";
-import { redis } from "./services/redisClient";
-import { broadcastWss } from "./services/server";
+  roomExists,
+  updateCube,
+  updatePlayer,
+} from "../redis/helpers";
+import { broadcastWss } from "../ws/broadcasts";
+import { generateId } from "../functions/generateId";
+import { formatRoomStats } from "../functions/formatRoomStats";
 
 declare module "telegraf" {
   interface Context {
@@ -103,7 +103,7 @@ bot.use(async (ctx, next) => {
   let session = await redis.get(key);
   ctx.session = session ? JSON.parse(session) : {};
   await next();
-  await redis.set(key, JSON.stringify(ctx.session), "EX", ROOM_TTL); // TTL 1 день
+  await redis.set(key, JSON.stringify(ctx.session), "EX", ROOM_TTL);
 });
 
 bot.catch((err, ctx) => {
@@ -451,7 +451,7 @@ bot.action(
     const playerId = ctx.from.id.toString();
 
     try {
-      const roomCode = genRoomId();
+      const roomCode = generateId();
       ctx.session.dmgPage = 0;
       ctx.session.waitingFor = undefined;
 

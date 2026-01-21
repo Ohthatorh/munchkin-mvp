@@ -1,4 +1,5 @@
-import "./services/server";
+import "./redis/client";
+import "./server";
 import "./bot";
 
-console.log("Backend ready");
+console.log("Backend is started");

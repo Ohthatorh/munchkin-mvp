@@ -15,3 +15,14 @@ export type TSession = {
   waitingFor?: "NICK" | "ROOM_CODE";
   dmgPage?: number;
 };
+
+export interface WSMessage {
+  type: string;
+  data: any;
+}
+
+export interface IRoomEvent {
+  timestamp: number;
+  playerId: string;
+  text: string;
+}

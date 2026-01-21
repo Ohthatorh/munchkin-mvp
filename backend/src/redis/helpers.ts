@@ -1,12 +1,13 @@
-import { redis } from "../services/redisClient";
-import { IPlayer } from "./types";
+import { IPlayer, IRoomEvent } from "../types";
 import {
   broadcastCubeUpdate,
   broadcastRoomEvent,
   broadcastRoomState,
-} from "../services/server";
+} from "../ws/broadcasts";
+import { redis } from "./client";
 
-export const ROOM_TTL = 12 * 60 * 60; // 12 часов в секундах
+export const ROOM_TTL = 12 * 60 * 60;
+const HISTORY_LIMIT = 10;
 
 export async function createRoom(code: string) {
   const exists = await redis.exists(`room:${code}`);
@@ -133,4 +134,27 @@ export async function leaveRoom(roomCode: string, playerId: string) {
     playerId,
     text: `Игрок ${player.nickname} покинул комнату`,
   });
+}
+
+export async function addRoomEvent(
+  room: string,
+  playerId: string,
+  text: string,
+) {
+  const event: IRoomEvent = {
+    timestamp: Date.now(),
+    playerId,
+    text,
+  };
+  await redis.lpush(`room:${room}:history`, JSON.stringify(event));
+  await redis.ltrim(`room:${room}:history`, 0, HISTORY_LIMIT - 1);
+  return event;
+}
+
+export async function getRoomHistory(
+  room: string,
+  limit = 50,
+): Promise<IRoomEvent[]> {
+  const raw = await redis.lrange(`room:${room}:history`, 0, limit - 1);
+  return raw.map((item) => JSON.parse(item));
 }

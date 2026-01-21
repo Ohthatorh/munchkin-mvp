@@ -1,4 +1,4 @@
-export function genRoomId() {
+export function generateId() {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   let id = "";
   for (let i = 0; i < 6; i++) {
