@@ -738,6 +738,7 @@ bot.on(
           return;
 
         case "NICK":
+          console.log(ctx);
           if (!inRoom)
             return ctx.reply(
               "Ты не в комнате ❌",
