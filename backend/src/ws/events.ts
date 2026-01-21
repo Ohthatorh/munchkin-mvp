@@ -1,7 +1,7 @@
-import { rooms, wss } from ".";
+import { wsRooms, wss } from ".";
 import { getRoomHistory, roomExists } from "../redis/helpers";
 import { IRoomEvent, WSMessage } from "../types";
-import { broadcastRoomState } from "./broadcasts";
+import { broadcastwsRoomstate } from "./broadcasts";
 
 wss.on("connection", (ws, req) => {
   let currentRoom: string | null = null;
@@ -28,11 +28,11 @@ wss.on("connection", (ws, req) => {
 
           currentRoom = roomCode;
 
-          if (!rooms[currentRoom!]) rooms[currentRoom!] = new Set();
-          rooms[currentRoom!].add(ws);
+          if (!wsRooms[currentRoom!]) wsRooms[currentRoom!] = new Set();
+          wsRooms[currentRoom!].add(ws);
           const history: IRoomEvent[] = await getRoomHistory(currentRoom!);
           ws.send(JSON.stringify({ type: "ROOM_HISTORY", data: history }));
-          await broadcastRoomState(currentRoom!);
+          await broadcastwsRoomstate(currentRoom!);
           break;
 
         default:
@@ -44,10 +44,10 @@ wss.on("connection", (ws, req) => {
   });
 
   ws.on("close", () => {
-    if (currentRoom && rooms[currentRoom]) {
-      rooms[currentRoom].delete(ws);
-      if (rooms[currentRoom].size === 0) {
-        delete rooms[currentRoom];
+    if (currentRoom && wsRooms[currentRoom]) {
+      wsRooms[currentRoom].delete(ws);
+      if (wsRooms[currentRoom].size === 0) {
+        delete wsRooms[currentRoom];
       }
     }
   });
