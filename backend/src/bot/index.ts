@@ -2,7 +2,7 @@ import { Telegraf, Markup, session, Context } from "telegraf";
 import { message } from "telegraf/filters";
 import "dotenv/config";
 import { IPlayer, TSession } from "../types";
-import { redis } from "../redis/client";
+import { redis } from "../redis";
 import {
   addPlayer,
   createRoom,

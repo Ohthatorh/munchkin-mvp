@@ -4,7 +4,7 @@ import {
   broadcastRoomEvent,
   broadcastRoomState,
 } from "../ws/broadcasts";
-import { redis } from "./client";
+import { redis } from ".";
 
 export const ROOM_TTL = 12 * 60 * 60;
 const HISTORY_LIMIT = 10;

@@ -1,4 +1,4 @@
-import "./redis/client";
+import "./redis";
 import "./server";
 import "./ws";
 import "./bot";
