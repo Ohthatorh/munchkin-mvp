@@ -125,6 +125,10 @@ export async function broadcastRoomEvent(room: string, event: IRoomEvent) {
   rooms[room].forEach((client) => client.send(msg));
 }
 
+export async function broadcastWss(room: string, payload: any) {
+  broadcastRoomEvent(room, { type: "BATTLE", ...payload });
+}
+
 const PORT = process.env.PORT || 4000;
 server.listen(PORT, () => {
   console.log(`Express + WS running on port ${PORT}`);
