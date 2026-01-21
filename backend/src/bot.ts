@@ -283,7 +283,7 @@ bot.action(
     await ctx.deleteMessage();
     ctx.session.waitingFor = "ROOM_CODE";
     ctx.session.lastPromptMsgId = ctx.message_id;
-    console.log(ctx);
+    console.log(ctx.update.callback_query.message);
     ctx.reply("Напиши код комнаты 🔑:");
     ctx.answerCbQuery();
   }),
