@@ -1,6 +1,6 @@
-import { wsRooms } from ".";
 import { addRoomEvent, getPlayers } from "../redis/helpers";
 import { IRoomEvent } from "../types";
+import { wsRooms } from "./wsRooms";
 
 export async function broadcastRoomState(roomCode: string) {
   console.log("Broadcasting room state for room:", roomCode);
