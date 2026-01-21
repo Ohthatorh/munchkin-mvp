@@ -282,8 +282,7 @@ bot.action(
   safe(async (ctx) => {
     await ctx.deleteMessage();
     ctx.session.waitingFor = "ROOM_CODE";
-    ctx.session.lastPromptMsgId = ctx.message_id;
-    console.log(ctx.update.callback_query.message);
+    ctx.session.lastPromptMsgId = ctx.update.callback_query.message.message_id;
     ctx.reply("Напиши код комнаты 🔑:");
     ctx.answerCbQuery();
   }),
@@ -321,7 +320,8 @@ bot.action(
   safe(async (ctx) => {
     await ctx.deleteMessage();
     ctx.session.waitingFor = "NICK";
-    ctx.session.lastPromptMsgId = ctx.message_id;
+    ctx.session.lastPromptMsgId = ctx.update.callback_query.message.message_id;
+
     ctx.reply("Напиши свой ник 📝:");
     ctx.answerCbQuery();
   }),
