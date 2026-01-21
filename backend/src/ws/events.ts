@@ -1,7 +1,7 @@
 import { wsRooms, wss } from ".";
 import { getRoomHistory, roomExists } from "../redis/helpers";
 import { IRoomEvent, WSMessage } from "../types";
-import { broadcastwsRoomstate } from "./broadcasts";
+import { broadcastRoomstate } from "./broadcasts";
 
 wss.on("connection", (ws, req) => {
   let currentRoom: string | null = null;
@@ -32,7 +32,7 @@ wss.on("connection", (ws, req) => {
           wsRooms[currentRoom!].add(ws);
           const history: IRoomEvent[] = await getRoomHistory(currentRoom!);
           ws.send(JSON.stringify({ type: "ROOM_HISTORY", data: history }));
-          await broadcastwsRoomstate(currentRoom!);
+          await broadcastRoomstate(currentRoom!);
           break;
 
         default:
