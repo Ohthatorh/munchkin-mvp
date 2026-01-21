@@ -3,6 +3,8 @@ import { IRoomEvent } from "../types";
 import { rooms } from "./rooms";
 
 export async function broadcastRoomState(roomCode: string) {
+  console.log("Broadcasting room state for room:", roomCode);
+  console.log(rooms);
   if (!rooms[roomCode]) return;
 
   const playersObj = await getPlayers(roomCode);
