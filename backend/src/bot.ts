@@ -282,6 +282,7 @@ bot.action(
   safe(async (ctx) => {
     await ctx.deleteMessage();
     ctx.session.waitingFor = "ROOM_CODE";
+    ctx.session.lastPromptMsgId = ctx.message_id;
     ctx.reply("Напиши код комнаты 🔑:");
     ctx.answerCbQuery();
   }),
@@ -319,6 +320,7 @@ bot.action(
   safe(async (ctx) => {
     await ctx.deleteMessage();
     ctx.session.waitingFor = "NICK";
+    ctx.session.lastPromptMsgId = ctx.message_id;
     ctx.reply("Напиши свой ник 📝:");
     ctx.answerCbQuery();
   }),
@@ -735,10 +737,13 @@ bot.on(
             ]),
           );
           ctx.session.waitingFor = undefined;
+          if (ctx.session.lastPromptMsgId) {
+            await ctx.deleteMessage(ctx.session.lastPromptMsgId);
+            ctx.session.lastPromptMsgId = undefined;
+          }
           return;
 
         case "NICK":
-          console.log(ctx);
           if (!inRoom)
             return ctx.reply(
               "Ты не в комнате ❌",
@@ -763,6 +768,10 @@ bot.on(
             ]),
           );
           ctx.session.waitingFor = undefined;
+          if (ctx.session.lastPromptMsgId) {
+            await ctx.deleteMessage(ctx.session.lastPromptMsgId);
+            ctx.session.lastPromptMsgId = undefined;
+          }
           return;
       }
     }
