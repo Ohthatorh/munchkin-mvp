@@ -11,7 +11,7 @@ export function cubeActions(bot: Telegraf<Context<Update>>) {
   bot.action(
     "GET_CUBE",
     safe(async (ctx) => {
-      const [rooms] = await getRoomsForPlayer(ctx.from.id.toString());
+      const rooms = await getRoomsForPlayer(ctx.from.id.toString());
       const room = rooms[0];
       const playerId = ctx.from.id.toString();
       await ctx.deleteMessage();
@@ -19,7 +19,6 @@ export function cubeActions(bot: Telegraf<Context<Update>>) {
         return ctx.reply("Ты не в комнате ❌", startKeyboard());
 
       const battle = await redis.get(`tg:battle:${room}`);
-      console.log(battle);
       const isPlayerInBattle = battle
         ? JSON.parse(battle).owner === playerId ||
           JSON.parse(battle).assistant === playerId
