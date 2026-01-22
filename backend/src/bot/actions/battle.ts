@@ -181,21 +181,25 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
     safe(async (ctx) => {
       const playerId = ctx.from.id.toString();
       const [room] = await getRoomsForPlayer(playerId);
-
+      const players = await getPlayers(room);
+      const player = await getPlayer(room, playerId);
       const raw = await redis.get(`tg:battle:${room}`);
       if (!raw) return ctx.reply("Боя нет");
 
       const battle = JSON.parse(raw);
 
       let text = `⚔️ Бой:\n\n`;
-      text += `Начал: ${battle.owner}\n`;
-      if (battle.assistant) text += `Помощник: ${battle.assistant}\n\n`;
-
+      text += `Начал: ${player!.nickname}\n`;
+      if (battle.assistant)
+        text += `Помощник: ${players[battle.assistant].nickname}\n\n`;
+      text += `Общий урон игроков: ${Object.values(players).reduce((a: number, b: any) => a + b.dmg, 0)}\n\n`;
       if (!battle.monsters.length) text += `Монстров нет\n`;
       else {
         text += battle.monsters
           .map((m: any) => `Монстр #${m.id} — DMG ${m.dmg}`)
           .join("\n");
+        text += "\n\n";
+        text += `Общий урон монстров: ${battle.monsters.reduce((a: number, b: any) => a + b.dmg, 0)}\n`;
       }
 
       ctx.reply(text, battle.active ? battleKeyboard() : undefined);
@@ -228,7 +232,7 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
       broadcastRoomBattle(room, {
         timestamp: Date.now(),
         playerId,
-        text: `Игрок ${player!.nickname} вышел из боя`,
+        text: `Игрок ${player!.nickname} закончил бой`,
       });
 
       ctx.reply(`Вы вышли из боя`, defaultKeyboard());

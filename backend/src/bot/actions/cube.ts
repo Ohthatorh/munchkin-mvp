@@ -11,7 +11,7 @@ export function cubeActions(bot: Telegraf<Context<Update>>) {
   bot.action(
     "GET_CUBE",
     safe(async (ctx) => {
-      const rooms = await getRoomsForPlayer(ctx.from.id.toString());
+      const [rooms] = await getRoomsForPlayer(ctx.from.id.toString());
       const room = rooms[0];
       const playerId = ctx.from.id.toString();
       await ctx.deleteMessage();
@@ -19,16 +19,16 @@ export function cubeActions(bot: Telegraf<Context<Update>>) {
         return ctx.reply("Ты не в комнате ❌", startKeyboard());
 
       const battle = await redis.get(`tg:battle:${room}`);
-      if (battle) {
-        return ctx.reply("Ты в бою!", battleKeyboard());
-      }
-
+      const isPlayerInBattle = battle
+        ? JSON.parse(battle).owner === playerId ||
+          JSON.parse(battle).assistant === playerId
+        : false;
       const roll = Math.floor(Math.random() * 6) + 1;
       const emoji = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"][roll - 1];
 
       ctx.reply(
         `🎲 Ты бросил кубик!\nВыпало: ${roll} ${emoji}`,
-        defaultKeyboard(),
+        isPlayerInBattle ? battleKeyboard() : defaultKeyboard(),
       );
       await updateCube(room, playerId, roll.toString());
       ctx.answerCbQuery();
