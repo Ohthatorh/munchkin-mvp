@@ -6,7 +6,7 @@ import { defaultKeyboard } from "../keyboards/default";
 import { Update } from "telegraf/typings/core/types/typegram";
 import { safe } from "../../functions/safeHandler";
 import { battleKeyboard } from "../keyboards/battle";
-import { dmgKeyboard } from "../keyboards/dmg";
+import { monsterDmgKeyboard } from "../keyboards/dmg";
 
 async function finishBattle(ctx: Context, result: "win" | "lose") {
   const playerId = ctx.from!.id.toString();
@@ -142,7 +142,7 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
 
       ctx.reply(
         `Монстр #${nextId} добавлен. Укажи урон:`,
-        dmgKeyboard(0, true),
+        monsterDmgKeyboard(0),
       );
     }),
   );

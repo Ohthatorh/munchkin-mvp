@@ -23,8 +23,6 @@ export function cubeActions(bot: Telegraf<Context<Update>>) {
         ? JSON.parse(battle).owner === playerId ||
           JSON.parse(battle).assistant === playerId
         : false;
-      console.log(battle);
-      console.log(isPlayerInBattle);
       const roll = Math.floor(Math.random() * 6) + 1;
       const emoji = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"][roll - 1];
 
