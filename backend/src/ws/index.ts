@@ -3,8 +3,7 @@ import { httpServer } from "../server";
 import { broadcastRoomState } from "./broadcasts";
 import { IRoomEvent, WSMessage } from "../types";
 import { getRoomHistory, roomExists } from "../redis/helpers";
-
-export const wsRooms: Record<string, Set<WebSocket>> = {};
+import { wsRooms } from "./wsRooms";
 
 export const wss = new WebSocketServer({ server: httpServer });
 
