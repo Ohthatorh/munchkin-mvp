@@ -10,7 +10,7 @@ export function battleKeyboard() {
     [Markup.button.callback("🎲 Кинуть кубик", "GET_CUBE")],
     [Markup.button.callback("🏆 Я победил", "BATTLE_WIN")],
     [Markup.button.callback("💀 Я проиграл", "BATTLE_LOSE")],
-    [Markup.button.callback("🚪 Выйти из боя", "BATTLE_EXIT")],
+    [Markup.button.callback("🚪 Закончить бой", "BATTLE_EXIT")],
     [Markup.button.callback("ℹ️ Инфо о бое", "BATTLE_INFO")],
   ]);
 }

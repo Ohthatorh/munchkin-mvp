@@ -238,7 +238,7 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
         text: `Игрок ${player!.nickname} закончил бой`,
       });
 
-      ctx.reply(`Вы вышли из боя`, defaultKeyboard());
+      ctx.reply(`Вы закончили бой`, defaultKeyboard());
     }),
   );
 }
