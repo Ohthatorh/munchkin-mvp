@@ -36,6 +36,6 @@ export async function broadcastRoomEvent(room: string, event: IRoomEvent) {
   wsRooms[room].forEach((client) => client.send(msg));
 }
 
-export async function broadcastWss(room: string, payload: any) {
-  broadcastRoomEvent(room, { type: "BATTLE", ...payload });
+export async function broadcastRoomBattle(room: string, event: IRoomEvent) {
+  broadcastRoomEvent(room, event);
 }

@@ -1,7 +1,7 @@
 import { Context, Markup, Telegraf } from "telegraf";
-import { getPlayers, getRoomsForPlayer } from "../../redis/helpers";
+import { getPlayer, getPlayers, getRoomsForPlayer } from "../../redis/helpers";
 import { redis } from "../../redis";
-import { broadcastWss } from "../../ws/broadcasts";
+import { broadcastRoomBattle, broadcastWss } from "../../ws/broadcasts";
 import { defaultKeyboard } from "../keyboards/default";
 import { Update } from "telegraf/typings/core/types/typegram";
 import { safe } from "../../functions/safeHandler";
@@ -37,7 +37,7 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
     safe(async (ctx) => {
       const playerId = ctx.from.id.toString();
       const [room] = await getRoomsForPlayer(playerId);
-
+      const player = await getPlayer(room, playerId);
       const exists = await redis.get(`tg:battle:${room}`);
       if (exists) {
         return ctx.reply("В комнате уже идет бой ⚠️");
@@ -53,7 +53,11 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
 
       await redis.set(`tg:battle:${room}`, JSON.stringify(battle));
 
-      broadcastWss(room, { type: "BATTLE_START", by: playerId });
+      broadcastRoomBattle(room, {
+        timestamp: Date.now(),
+        playerId,
+        text: `Игрок ${player!.nickname} начал бой ⚔️`,
+      });
 
       return ctx.reply(
         "⚔️ Ты начал бой. Добавьте монстра или помощника.",
