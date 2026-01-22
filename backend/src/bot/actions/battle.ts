@@ -140,7 +140,10 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
 
       await redis.set(`tg:battle:${room}`, JSON.stringify(battle));
 
-      ctx.reply(`Монстр #${nextId} добавлен. Укажи урон:`, dmgKeyboard(0));
+      ctx.reply(
+        `Монстр #${nextId} добавлен. Укажи урон:`,
+        dmgKeyboard(0, true),
+      );
     }),
   );
 
