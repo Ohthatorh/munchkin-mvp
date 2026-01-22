@@ -19,6 +19,7 @@ export function cubeActions(bot: Telegraf<Context<Update>>) {
         return ctx.reply("Ты не в комнате ❌", startKeyboard());
 
       const battle = await redis.get(`tg:battle:${room}`);
+      console.log(battle);
       const isPlayerInBattle = battle
         ? JSON.parse(battle).owner === playerId ||
           JSON.parse(battle).assistant === playerId
