@@ -5,9 +5,7 @@ import {
   broadcastRoomState,
 } from "../ws/broadcasts";
 import { redis } from ".";
-
-export const ROOM_TTL = 12 * 60 * 60;
-const HISTORY_LIMIT = 10;
+import { HISTORY_LIMIT, ROOM_TTL } from "../config";
 
 export async function createRoom(code: string) {
   const exists = await redis.exists(`room:${code}`);
