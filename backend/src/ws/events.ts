@@ -1,8 +1,7 @@
-import { wss } from ".";
+import { wsRooms, wss } from ".";
 import { getRoomHistory, roomExists } from "../redis/helpers";
 import { IRoomEvent, WSMessage } from "../types";
 import { broadcastRoomState } from "./broadcasts";
-import { wsRooms } from "./wsRooms";
 
 wss.on("connection", (ws, req) => {
   let currentRoom: string | null = null;
