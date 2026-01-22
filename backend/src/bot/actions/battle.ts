@@ -11,17 +11,18 @@ import { dmgKeyboard } from "../keyboards/dmg";
 async function finishBattle(ctx: Context, result: "win" | "lose") {
   const playerId = ctx.from!.id.toString();
   const [room] = await getRoomsForPlayer(playerId);
+  const player = await getPlayer(room, playerId);
 
   const raw = await redis.get(`tg:battle:${room}`);
   if (!raw) return ctx.reply("Боя нет");
 
   await redis.del(`tg:battle:${room}`);
 
-  // broadcastWss(room, {
-  //   type: "BATTLE_FINISH",
-  //   by: playerId,
-  //   result,
-  // });
+  broadcastRoomBattle(room, {
+    timestamp: Date.now(),
+    playerId,
+    text: `Бой завершён — ${result === "win" ? "победой" : "поражением"} игрока ${player!.nickname}`,
+  });
 
   ctx.reply(
     result === "win"
@@ -79,7 +80,12 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
         .map((p) =>
           Markup.button.callback(players[p].nickname, `BATTLE_ASSIST_${p}`),
         );
-
+      if (buttons.length === 0) {
+        return ctx.reply(
+          "В комнате нет других игроков для помощника ⚠️",
+          battleKeyboard(),
+        );
+      }
       return ctx.reply(
         "Выбери помощника:",
         Markup.inlineKeyboard(buttons.map((b) => [b])),
@@ -92,19 +98,30 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
     safe(async (ctx) => {
       const assistantId = ctx.match[1];
       const playerId = ctx.from.id.toString();
+
       const [room] = await getRoomsForPlayer(playerId);
+      const players = await getPlayers(room);
 
       const raw = await redis.get(`tg:battle:${room}`);
       const battle = JSON.parse(raw!);
 
-      if (battle.assistant) return ctx.reply("Помощник уже есть ⚠️");
+      if (battle.assistant)
+        return ctx.reply("Помощник уже есть ⚠️", battleKeyboard());
 
       battle.assistant = assistantId;
 
       await redis.set(`tg:battle:${room}`, JSON.stringify(battle));
-      // broadcastWss(room, { type: "BATTLE_ASSIST", assistantId });
 
-      ctx.reply("Помощник добавлен", battleKeyboard());
+      broadcastRoomBattle(room, {
+        timestamp: Date.now(),
+        playerId,
+        text: `Игрок ${players[assistantId].nickname} стал помощником в бою с ${players[playerId].nickname}`,
+      });
+
+      ctx.reply(
+        `Игрок ${players[assistantId].nickname} стал помощником`,
+        battleKeyboard(),
+      );
     }),
   );
 
@@ -122,8 +139,6 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
       battle.monsters.push({ id: nextId, dmg: 0 });
 
       await redis.set(`tg:battle:${room}`, JSON.stringify(battle));
-
-      // broadcastWss(room, { type: "BATTLE_ADD_MONSTER", id: nextId });
 
       ctx.reply(`Монстр #${nextId} добавлен. Укажи урон:`, dmgKeyboard(0));
     }),
@@ -148,7 +163,11 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
 
       await redis.set(`tg:battle:${room}`, JSON.stringify(battle));
 
-      // broadcastWss(room, { type: "BATTLE_MONSTER_DMG", monsterId, dmg });
+      broadcastRoomBattle(room, {
+        timestamp: Date.now(),
+        playerId,
+        text: `Монстр #${monsterId} с уроном ⚔️ ${dmg} присоединился к бою`,
+      });
 
       ctx.reply(
         `Урон монстра #${monsterId} теперь ⚔️ ${dmg}`,
@@ -202,12 +221,17 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
     safe(async (ctx) => {
       const playerId = ctx.from.id.toString();
       const [room] = await getRoomsForPlayer(playerId);
+      const player = await getPlayer(room, playerId);
 
       await redis.del(`tg:battle:${room}`);
 
-      // broadcastWss(room, { type: "BATTLE_EXIT", playerId });
+      broadcastRoomBattle(room, {
+        timestamp: Date.now(),
+        playerId,
+        text: `Игрок ${player!.nickname} вышел из боя`,
+      });
 
-      ctx.reply(`Игрок вышел из боя`, defaultKeyboard());
+      ctx.reply(`Вы вышли из боя`, defaultKeyboard());
     }),
   );
 }
