@@ -1,7 +1,7 @@
 import { Context, Markup, Telegraf } from "telegraf";
 import { getPlayer, getPlayers, getRoomsForPlayer } from "../../redis/helpers";
 import { redis } from "../../redis";
-import { broadcastRoomBattle, broadcastWss } from "../../ws/broadcasts";
+import { broadcastRoomBattle } from "../../ws/broadcasts";
 import { defaultKeyboard } from "../keyboards/default";
 import { Update } from "telegraf/typings/core/types/typegram";
 import { safe } from "../../functions/safeHandler";
@@ -17,11 +17,11 @@ async function finishBattle(ctx: Context, result: "win" | "lose") {
 
   await redis.del(`tg:battle:${room}`);
 
-  broadcastWss(room, {
-    type: "BATTLE_FINISH",
-    by: playerId,
-    result,
-  });
+  // broadcastWss(room, {
+  //   type: "BATTLE_FINISH",
+  //   by: playerId,
+  //   result,
+  // });
 
   ctx.reply(
     result === "win"
@@ -102,7 +102,7 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
       battle.assistant = assistantId;
 
       await redis.set(`tg:battle:${room}`, JSON.stringify(battle));
-      broadcastWss(room, { type: "BATTLE_ASSIST", assistantId });
+      // broadcastWss(room, { type: "BATTLE_ASSIST", assistantId });
 
       ctx.reply("Помощник добавлен", battleKeyboard());
     }),
@@ -123,7 +123,7 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
 
       await redis.set(`tg:battle:${room}`, JSON.stringify(battle));
 
-      broadcastWss(room, { type: "BATTLE_ADD_MONSTER", id: nextId });
+      // broadcastWss(room, { type: "BATTLE_ADD_MONSTER", id: nextId });
 
       ctx.reply(`Монстр #${nextId} добавлен. Укажи урон:`, dmgKeyboard(0));
     }),
@@ -148,7 +148,7 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
 
       await redis.set(`tg:battle:${room}`, JSON.stringify(battle));
 
-      broadcastWss(room, { type: "BATTLE_MONSTER_DMG", monsterId, dmg });
+      // broadcastWss(room, { type: "BATTLE_MONSTER_DMG", monsterId, dmg });
 
       ctx.reply(
         `Урон монстра #${monsterId} теперь ⚔️ ${dmg}`,
@@ -205,7 +205,7 @@ export function battleActions(bot: Telegraf<Context<Update>>) {
 
       await redis.del(`tg:battle:${room}`);
 
-      broadcastWss(room, { type: "BATTLE_EXIT", playerId });
+      // broadcastWss(room, { type: "BATTLE_EXIT", playerId });
 
       ctx.reply(`Игрок вышел из боя`, defaultKeyboard());
     }),
