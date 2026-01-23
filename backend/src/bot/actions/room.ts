@@ -106,7 +106,7 @@ export function roomActions(bot: Telegraf<Context<Update>>) {
       const players = await getPlayers(room);
 
       ctx.reply(
-        `🏟 Комната ${room}:\n\n${formatRoomStats(players)}`,
+        `🏟 Комната ${room}:\nНа сайте:https://munchhelper.com/${room}\n\n${formatRoomStats(players)}`,
         defaultKeyboard(),
       );
       ctx.answerCbQuery();
