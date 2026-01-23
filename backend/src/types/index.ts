@@ -4,6 +4,7 @@ export interface IPlayer {
   level: number;
   damage: number;
   sex: string;
+  modifier: number;
 }
 
 export interface IRoom {
@@ -12,7 +13,7 @@ export interface IRoom {
 }
 
 export type TSession = {
-  waitingFor?: "NICK" | "ROOM_CODE";
+  waitingFor?: "NICK" | "ROOM_CODE" | "MODIFIER";
   dmgPage?: number;
 };
 

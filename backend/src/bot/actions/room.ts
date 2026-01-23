@@ -30,6 +30,7 @@ export function roomActions(bot: Telegraf<Context<Update>>) {
           nickname: "",
           level: 1,
           damage: 0,
+          modifier: 0,
           sex: "мужчина",
         };
 

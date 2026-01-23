@@ -12,6 +12,7 @@ import { dmgActions } from "./actions/dmg";
 import { lvlActions } from "./actions/level";
 import { myActions } from "./actions/my";
 import { textActions } from "./actions/text";
+import { modifierActions } from "./actions/modifier";
 
 declare module "telegraf" {
   interface Context {
@@ -34,6 +35,7 @@ lvlActions(bot);
 myActions(bot);
 battleActions(bot);
 textActions(bot);
+modifierActions(bot);
 
 bot.catch((err, ctx) => {
   console.error("TELEGRAF ERROR:", err);

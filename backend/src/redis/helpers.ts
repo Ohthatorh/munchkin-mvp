@@ -86,6 +86,13 @@ export async function updatePlayer(
       text: `Игрок ${player.nickname} изменил свой уровень на ${newPlayer.level}`,
     });
   }
+  if (player.modifier !== newPlayer.modifier) {
+    await broadcastRoomEvent(roomCode, {
+      timestamp: Date.now(),
+      playerId,
+      text: `Игрок ${player.nickname} изменил свой модификатор на ${newPlayer.modifier}`,
+    });
+  }
   if (player.sex !== newPlayer.sex) {
     await broadcastRoomEvent(roomCode, {
       timestamp: Date.now(),

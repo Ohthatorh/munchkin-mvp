@@ -8,6 +8,7 @@ export function defaultKeyboard() {
     getButton(["SET_LEVEL"]),
     getButton(["SET_DMG"]),
     getButton(["SET_SEX"]),
+    getButton(["CHANGE_MODIFIER"]),
     getButton(["ROOM_STATS"]),
     getButton(["MY_STATS"]),
     getButton(["DIE"]),

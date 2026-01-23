@@ -49,6 +49,13 @@ export const BUTTONS = [
     code: "BATTLE_START",
     callback: Markup.button.callback("⚔️ Начать бой", "BATTLE_START"),
   },
+  {
+    code: "CHANGE_MODIFIER",
+    callback: Markup.button.callback(
+      "⚔️ Изменить модификатор",
+      "CHANGE_MODIFIER",
+    ),
+  },
 ];
 
 export function getButton(codes: string[]) {
