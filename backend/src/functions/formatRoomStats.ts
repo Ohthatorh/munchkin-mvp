@@ -16,7 +16,7 @@ export function formatRoomStats(players: Record<string, IPlayer>): string {
     result += `🛡️${p.nickname} ${sexEmoji}\n\n`;
     result += `${levelEmoji} Уровень: ${p.level}\n`;
     result += `${dmgEmoji} Урон от шмота: ${p.damage}\n`;
-    result += `${dmgEmoji} Модификатор: ${p.modifier}\n`;
+    result += `${dmgEmoji} Модификатор: ${Number(p.modifier)}\n`;
     result += `${totalEmoji} Общий урон: ${Number(p.level) + Number(p.damage) + Number(p.modifier)}\n`;
     result += `────────────────────\n`;
   }

@@ -77,9 +77,9 @@ export function textActions(bot: Telegraf<Context<Update>>) {
           case "MODIFIER":
             if (!inRoom)
               return ctx.reply("Ты не в комнате ❌", startKeyboard());
-            if (isNaN(Number(input)))
+            if (!isNaN(input))
               return ctx.reply("Не число ты чо даун?", defaultKeyboard());
-            await updatePlayer(room, playerId, { modifier: input });
+            await updatePlayer(room, playerId, { modifier: Number(input) });
             await ctx.deleteMessage();
             ctx.reply(
               `Твой модификатор теперь: 📝 ${input}`,
