@@ -22,9 +22,14 @@ export function myActions(bot: Telegraf<Context<Update>>) {
       }
 
       const room = rooms[0];
-      await updatePlayer(room, playerId, {
-        damage: 0,
-      });
+      await updatePlayer(
+        room,
+        playerId,
+        {
+          damage: 0,
+        },
+        "death",
+      );
 
       ctx.reply(
         "☠️ Ты погиб! Весь шмот потерян. Урон теперь 0.",

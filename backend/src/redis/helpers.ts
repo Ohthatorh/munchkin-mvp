@@ -62,6 +62,7 @@ export async function updatePlayer(
   roomCode: string,
   playerId: string,
   updates: Partial<IPlayer>,
+  type?: string,
 ) {
   const key = `room:${roomCode}:players`;
   const p = await redis.hget(key, playerId);
@@ -90,6 +91,13 @@ export async function updatePlayer(
       timestamp: Date.now(),
       playerId,
       text: `Игрок ${player.nickname} изменил свой пол на ${newPlayer.sex}`,
+    });
+  }
+  if (type === "death") {
+    await broadcastRoomEvent(roomCode, {
+      timestamp: Date.now(),
+      playerId,
+      text: `Игрок ${player.nickname} погиб. ☠️ Весь шмот потерян.  `,
     });
   }
   return newPlayer;
