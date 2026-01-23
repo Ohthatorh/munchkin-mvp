@@ -57,7 +57,7 @@ export function myActions(bot: Telegraf<Context<Update>>) {
           `⬆️ LVL: ${player.level}\n` +
           `⚔️ DMG: ${player.damage}\n` +
           `👥 MODIFIER: ${player.modifier}\n` +
-          `🎯 TOTAL: ${player.level + player.damage + player.modifier}\n` +
+          `🎯 TOTAL: ${Number(player.level) + Number(player.damage) + Number(player.modifier)}\n` +
           `🧑‍🤝‍🧑 Пол: ${player.sex}`,
         defaultKeyboard(),
       );
