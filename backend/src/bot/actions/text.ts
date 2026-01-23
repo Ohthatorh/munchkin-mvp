@@ -75,9 +75,10 @@ export function textActions(bot: Telegraf<Context<Update>>) {
             ctx.session.waitingFor = undefined;
             return;
           case "MODIFIER":
+            ctx.session.waitingFor = undefined;
             if (!inRoom)
               return ctx.reply("Ты не в комнате ❌", startKeyboard());
-            if (!isNaN(input))
+            if (isNaN(input))
               return ctx.reply("Не число ты чо даун?", defaultKeyboard());
             await updatePlayer(room, playerId, { modifier: Number(input) });
             await ctx.deleteMessage();
@@ -85,7 +86,6 @@ export function textActions(bot: Telegraf<Context<Update>>) {
               `Твой модификатор теперь: 📝 ${input}`,
               defaultKeyboard(),
             );
-            ctx.session.waitingFor = undefined;
             return;
         }
       }
