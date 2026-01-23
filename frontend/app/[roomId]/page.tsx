@@ -10,6 +10,7 @@ interface Player {
   level: number;
   damage: number;
   sex: string;
+  modifier: number;
 }
 
 interface IRoomEvent {
@@ -79,6 +80,7 @@ export default function Room() {
                   <th>Пол</th>
                   <th>Уровень</th>
                   <th>Шмотки</th>
+                  <th>Модификатор</th>
                   <th>Общий урон</th>
                 </tr>
               </thead>
@@ -89,7 +91,8 @@ export default function Room() {
                     <td>{p.sex}</td>
                     <td>{p.level}</td>
                     <td>{p.damage}</td>
-                    <td>{p.damage + p.level}</td>
+                    <td>{p.modifier}</td>
+                    <td>{p.damage + p.level + p.modifier}</td>
                   </tr>
                 ))}
               </tbody>
