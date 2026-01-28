@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  --spacing: 8px;
+  --font-sans: var(--font-inter);
+  --font-underdog: var(--font-underdog);
+  --color-brown: #1f0f06;
+  --breakpoint-xs: 320px;
+  --breakpoint-sm: 768px;
+  --breakpoint-md: 1024px;
+  --breakpoint-lg: 1280px;
+  --breakpoint-xl: 1440px;
+  --breakpoint-2xl: 1920px;
+}
+
+@layer utilities {
+  body {
+    @apply text-base;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-normal);
+    background-image: url("../assets/images/background-main.webp");
+    background-repeat: no-repeat;
+    color: var(--color-txt-contrast);
+  }
+
+  button {
+    cursor: pointer;
+    &:disabled {
+      cursor: default;
+      pointer-events: none;
+    }
+  }
+
+  main {
+    min-height: 100vh;
+    padding-top: 126px;
+    padding-bottom: 100px;
+    @media only screen and (min-width: 320px) and (max-width: 767.98px) {
+      padding-top: 68px;
+    }
+    @media only screen and (min-width: 768px) and (max-width: 1279.98px) {
+      padding-top: 72px;
+    }
+  }
+
+  section {
+    width: 100%;
+  }
+  .container {
+    margin: 0 auto;
+    padding: 0 100px;
+    max-width: 1640px;
+    @media only screen and (min-width: 320px) and (max-width: 767.98px) {
+      padding: 0 16px;
+    }
+    @media only screen and (min-width: 768px) and (max-width: 1023.98px) {
+      padding: 0 50px;
+    }
+  }
+  .container-cart {
+    margin: 0 auto;
+    padding: 0 40px;
+    max-width: 1010px;
+  }
+}
